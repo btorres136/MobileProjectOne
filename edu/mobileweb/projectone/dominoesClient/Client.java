@@ -7,7 +7,9 @@ import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 
 import com.sun.org.apache.bcel.internal.classfile.Code;
 
@@ -20,8 +22,8 @@ import edu.mobileweb.projectone.transferCodes.Codes;
  */
 public class Client {
     //List of valid commmands on the protocol
-	private enum tftpValidCommands	{
-	    get, put, exit 
+	private enum ValidCommands	{
+	    seeTable, putPice, cantBePlay, exit 
 	}
 	
 	//Current command
@@ -50,7 +52,7 @@ public class Client {
     }
 
     public Client(String serveAddressStr, int serverPort) {
-        this.serverAddressStr = serverAddressStr;
+        this.serverAddressStr = serveAddressStr;
         this.serverPort=serverPort;
     }
     
@@ -60,7 +62,7 @@ public class Client {
         String arguments = "";
         Scanner reader = new Scanner(System.in);
         try {
-            ServerSocket server = new ServerSocket();
+            //ServerSocket server = new ServerSocket();
             InetAddress serveAddress = InetAddress.getByName(serverAddressStr);
             Socket socket = new Socket(serveAddress,serverPort);
             socketInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -94,14 +96,62 @@ public class Client {
 
 
         } catch (Exception e) {
-            
+            e.printStackTrace();
         }
     }
 
     public String readCommands(Scanner reader){
 
+        System.out.println(".......................... \n>");
 
-        return "";
+        LinkedList<String> commandList = new LinkedList<String>();
+        String command = reader.nextLine();
+        String result = "";
+
+        StringTokenizer commandStr = new StringTokenizer(command);
+
+        while (commandStr.hasMoreTokens()) {
+            commandList.add(commandStr.nextToken());
+        }
+
+
+        try {
+            switch(ValidCommands.valueOf(commandList.get(0))){
+                case seeTable: if(commandList.size()>1){
+                                currentCommand = Codes.SEETABLE;
+                                result = commandList.get(1);
+                                } else {
+                                    currentCommand = Codes.WRONGCOMMAND;
+                                }
+                                break;
+                case putPice: if(commandList.size()>1){
+                                currentCommand = Codes.PUTPIECE;
+                                result = commandList.get(1);
+                                } else {
+                                    currentCommand = Codes.WRONGCOMMAND;
+                                }
+                                break;
+                case cantBePlay: if(commandList.size()>1){
+                                currentCommand = Codes.CANTBEPLAY;
+                                result = commandList.get(1);
+                                } else {
+                                    currentCommand = Codes.WRONGCOMMAND;
+                                }
+                                break;
+                case exit:      currentCommand = Codes.CLOSECONNECTION;
+                                break;
+                default:        currentCommand = Codes.WRONGCOMMAND;
+                                result = command;
+                                break;
+
+            }
+        } catch (Exception e) {
+            currentCommand = Codes.WRONGCOMMAND;
+            result = command;
+            e.printStackTrace();
+        }       
+
+        return result;
     }
 
     public void exit(){
@@ -112,7 +162,7 @@ public class Client {
             int read = socketInputStream.readInt();
             System.out.println("Thanks for playing " + read);
         } catch (Exception e) {
-        
+            e.printStackTrace();
         }
     }
 
@@ -129,18 +179,19 @@ public class Client {
 
             //Wating for ok
 
-            read = socketInputStream.readInt();
+            read = socketInputStream.readInt(); 
 
             if (read == Codes.OK){
-                
-                
+                //Recive the pice list string of the table.
+                String tablePicesStr = socketInputStream.readUTF();
+                System.out.println("Table... \n" + tablePicesStr);
             }
             else{
                 System.out.println("Something hapended, error:" + read);
             }
 
         } catch (Exception e) {
-            
+            e.printStackTrace();
         }
     }
 
