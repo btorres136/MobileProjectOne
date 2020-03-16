@@ -1,0 +1,6 @@
+//Server
+javac edu\mobileweb\projectone\DominoServerApp.java
+java edu.mobileweb.projectone.DominoServerApp
+//Client
+javac edu\mobileweb\projectone\dominoesClient\Client.java
+java edu.mobileweb.projectone.dominoesClient.Client

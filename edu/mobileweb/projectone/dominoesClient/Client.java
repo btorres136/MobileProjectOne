@@ -11,9 +11,11 @@ import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+//
 import com.sun.org.apache.bcel.internal.classfile.Code;
 
 import edu.mobileweb.projectone.transferCodes.Codes;
+//import jdk.internal.util.xml.impl.Input;
 
 /**
  * <h3>Client Class</h3>
@@ -47,8 +49,10 @@ public class Client {
     
     public static void main(String []args){
         Client client = new Client("127.0.0.1", 1234);
-        
 
+        System.out.println("Connecting to the game");
+
+        client.play();
     }
 
     public Client(String serveAddressStr, int serverPort) {
@@ -60,7 +64,8 @@ public class Client {
     public void play(){
 
         String arguments = "";
-        Scanner reader = new Scanner(System.in);
+      //  Scanner reader = new Scanner(System.in);
+        int readComand;
         try {
             //ServerSocket server = new ServerSocket();
             InetAddress serveAddress = InetAddress.getByName(serverAddressStr);
@@ -69,12 +74,17 @@ public class Client {
             socketOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             System.out.println("Connected to the game...");
 
-            do {
-                arguments = readCommands(reader);
+           
+            readComand = socketInputStream.readInt();
 
+            //Wait for pieces
+
+            do {
+                //arguments = readCommands(reader);
+                //readComands modifies currentComand
                 switch(currentCommand)
                 {
-                    case Codes.SEETABLE:    seeTable(arguments);
+                    case Codes.SEETABLE:    seeTable();
                                             break;
 
                     case Codes.PUTPIECE:    putPice(arguments);
@@ -100,9 +110,11 @@ public class Client {
         }
     }
 
+    
+
     public String readCommands(Scanner reader){
 
-        System.out.println(".......................... \n>");
+        System.out.print(".......................... \n>");
 
         LinkedList<String> commandList = new LinkedList<String>();
         String command = reader.nextLine();
@@ -166,11 +178,12 @@ public class Client {
         }
     }
 
-    public void seeTable(String arguments){
+    //get the table
+    public void seeTable(){
         byte[] buffer = new byte[Codes.BUFFER_SIZE]; 
         try {
             int read = 0;
-            int totalRead =0;
+            //int totalRead =0;
 
             // Send the comand
             System.out.println("This is the latest table...");
@@ -194,7 +207,30 @@ public class Client {
             e.printStackTrace();
         }
     }
+    /*This comand will work from server to client one time at the begining of the game 
+      from the client side it will recive the 7 pices sent by the server and print them on 
+      the terminal*/
+    public void sendPice(){
+        System.out.println("Enter the sendPiece command in the Client");
+        byte[] buffer = new byte[Codes.BUFFER_SIZE];
+        int read;
+        try {
 
+            //Waiting for ok 
+            read = socketInputStream.readInt();
+
+            if(read == Codes.OK){
+                //recive pices and print
+                read = socketInputStream.read(buffer);
+                System.out.println("> Your pieces are: " + new String(buffer));
+            }
+            
+        } catch (Exception e) {
+            System.out.print("Error from sendPiece in Client: ");
+            e.printStackTrace();
+        }
+    }
+    
     public void putPice(String arguments){}
 
     public void cantBePlay(){}

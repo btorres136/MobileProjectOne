@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import edu.mobileweb.projectone.transferCodes.Codes;
+//import jdk.internal.util.xml.impl.Input;
 
 /**
  * <h3>Dominoes Server</h3>
@@ -91,6 +92,7 @@ public class DominoesServer {
 	 */
 	public void play(ArrayList<Socket> AllClients) throws IOException
 	{
+		System.out.println("Entered srver play");
 		ArrayList<DataInputStream> clientsInputStreams = new ArrayList<DataInputStream>(4);
 		ArrayList<DataOutputStream> clientsOutputStreams = new ArrayList<DataOutputStream>(4);
 		ArrayList<Socket> Clients = new ArrayList<Socket>(AllClients);
@@ -105,6 +107,14 @@ public class DominoesServer {
 		int readCommand;
 		DataOutputStream ClientHear;
 		DataInputStream ClientSpeak;
+		// Send the pieces to each player
+		for(int i = 0; i < 4; i++){
+			ClientSpeak = clientsInputStreams.get(i);
+			ClientHear = clientsOutputStreams.get(i);
+			this.SENDPICECommand(i, ClientSpeak, ClientHear, clientsOutputStreams);
+
+		}
+
 		for(int i = 0; i < 28; i++){
 			int player = firstPlayer+i%4;
 			ClientSpeak = clientsInputStreams.get(player);
@@ -119,6 +129,10 @@ public class DominoesServer {
 				case Codes.PUTPIECE:
 				this.PUTPIECECommand(player, ClientSpeak, ClientHear, clientsOutputStreams);
 				break;
+
+				case Codes.SENDPIECE:
+				this.SENDPICECommand(player, ClientSpeak, ClientHear, clientsOutputStreams);
+
 				// Exit command
 				case Codes.CLOSECONNECTION:
 				break;
@@ -129,10 +143,19 @@ public class DominoesServer {
 	public void SEETABLECommand(DataInputStream Input, DataOutputStream Output){
 		byte[] buffer = new byte[Codes.BUFFER_SIZE];
 		int totalRead = 0;
+		int read;
 		try{
 			Output.writeInt(Codes.OK);
 			Output.flush();
 			//Output.writeUTF(gameBoard.printList());
+
+			//wait
+			read = Input.readInt();
+
+			if(read == Codes.SEETABLE){
+				//Send table
+
+			}
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -156,7 +179,27 @@ public class DominoesServer {
 			e.printStackTrace();
 		}
 	}
+	//This function will send the player pieces.
+	public void SENDPICECommand(int player, DataInputStream Input, DataOutputStream Output, ArrayList<DataOutputStream> clients){
+		byte[] buffer = new byte[Codes.BUFFER_SIZE];
+		int read;
+		try {
 
+			Output.writeInt(Codes.SENDPIECE);
+			Output.flush();
+
+			//Wait for ok
+			read = Input.readInt();
+
+			if(read == Codes.OK){
+				//Send player pieces
+				Output.write(playerLists.get(player).getList().getBytes());
+			}
+			Output.flush();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 
 }
