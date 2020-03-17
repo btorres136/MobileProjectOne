@@ -79,6 +79,9 @@ public class Client {
             System.out.println("Read comand client: " + readComand);
             //Wait for pieces
 
+            if(readComand == Codes.SENDPIECE){
+                this.sendPice();
+            }
             
 
             do {

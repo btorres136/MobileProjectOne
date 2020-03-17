@@ -193,6 +193,7 @@ public class DominoesServer {
 
 			if(read == Codes.OK){
 				//Send player pieces
+				System.out.println("Player list: " + playerLists.get(player).getList());
 				Output.write(playerLists.get(player).getList().getBytes());
 			}
 			Output.flush();
