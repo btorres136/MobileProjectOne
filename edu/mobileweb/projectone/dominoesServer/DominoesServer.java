@@ -148,7 +148,7 @@ public class DominoesServer {
 			Output.writeInt(Codes.OK);
 			Output.flush();
 			//Output.writeUTF(gameBoard.printList());
-
+			
 			//wait
 			read = Input.readInt();
 
