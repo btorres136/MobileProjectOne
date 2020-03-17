@@ -111,8 +111,8 @@ public class DominoesServer {
 		for(int i = 0; i < 4; i++){
 			ClientSpeak = clientsInputStreams.get(i);
 			ClientHear = clientsOutputStreams.get(i);
-			this.SENDPICECommand(i, ClientSpeak, ClientHear, clientsOutputStreams);
 
+			
 		}
 
 		for(int i = 0; i < 28; i++){

@@ -64,7 +64,7 @@ public class Client {
     public void play(){
 
         String arguments = "";
-      //  Scanner reader = new Scanner(System.in);
+        Scanner reader = new Scanner(System.in);
         int readComand;
         try {
             //ServerSocket server = new ServerSocket();
@@ -76,11 +76,13 @@ public class Client {
 
            
             readComand = socketInputStream.readInt();
-
+            System.out.println("Read comand client: " + readComand);
             //Wait for pieces
 
+            
+
             do {
-                //arguments = readCommands(reader);
+                arguments = readCommands(reader);
                 //readComands modifies currentComand
                 switch(currentCommand)
                 {
@@ -216,14 +218,13 @@ public class Client {
         int read;
         try {
 
-            //Waiting for ok 
-            read = socketInputStream.readInt();
-
-            if(read == Codes.OK){
-                //recive pices and print
-                read = socketInputStream.read(buffer);
-                System.out.println("> Your pieces are: " + new String(buffer));
-            }
+            socketOutputStream.writeInt(Codes.OK);
+            socketOutputStream.flush();
+            
+            //recive pices and print
+            read = socketInputStream.read(buffer);
+            System.out.println("> Your pieces are: " + new String(buffer));
+            
             
         } catch (Exception e) {
             System.out.print("Error from sendPiece in Client: ");
