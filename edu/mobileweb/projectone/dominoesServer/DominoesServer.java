@@ -111,8 +111,8 @@ public class DominoesServer {
 		for(int i = 0; i < 4; i++){
 			ClientSpeak = clientsInputStreams.get(i);
 			ClientHear = clientsOutputStreams.get(i);
+			this.SENDPICECommand(i, ClientSpeak, ClientHear);
 
-			
 		}
 
 		for(int i = 0; i < 28; i++){
@@ -131,7 +131,7 @@ public class DominoesServer {
 				break;
 
 				case Codes.SENDPIECE:
-				this.SENDPICECommand(player, ClientSpeak, ClientHear, clientsOutputStreams);
+				this.SENDPICECommand(player, ClientSpeak, ClientHear);
 
 				// Exit command
 				case Codes.CLOSECONNECTION:
@@ -180,7 +180,7 @@ public class DominoesServer {
 		}
 	}
 	//This function will send the player pieces.
-	public void SENDPICECommand(int player, DataInputStream Input, DataOutputStream Output, ArrayList<DataOutputStream> clients){
+	public void SENDPICECommand(int player, DataInputStream Input, DataOutputStream Output){
 		byte[] buffer = new byte[Codes.BUFFER_SIZE];
 		int read;
 		try {
