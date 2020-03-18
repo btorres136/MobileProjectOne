@@ -92,7 +92,6 @@ public class DominoesServer {
 	 */
 	public void play(ArrayList<Socket> AllClients) throws IOException
 	{
-		System.out.println("Entered srver play");
 		ArrayList<DataInputStream> clientsInputStreams = new ArrayList<DataInputStream>(4);
 		ArrayList<DataOutputStream> clientsOutputStreams = new ArrayList<DataOutputStream>(4);
 		ArrayList<Socket> Clients = new ArrayList<Socket>(AllClients);
@@ -112,13 +111,16 @@ public class DominoesServer {
 			ClientSpeak = clientsInputStreams.get(i);
 			ClientHear = clientsOutputStreams.get(i);
 			this.SENDPICECommand(i, ClientSpeak, ClientHear);
-
 		}
-
+		System.out.println("Exit asign pieces in server");
 		for(int i = 0; i < 28; i++){
+			System.out.println("Entering game mecanics");
 			int player = firstPlayer+i%4;
 			ClientSpeak = clientsInputStreams.get(player);
 			ClientHear = clientsOutputStreams.get(player);
+			
+			this.indicateTurn(player, ClientSpeak, ClientHear);
+
 			readCommand = ClientSpeak.readInt();
 			System.out.println("Received Command: " + readCommand);
 			switch (readCommand) {
@@ -135,11 +137,33 @@ public class DominoesServer {
 
 				// Exit command
 				case Codes.CLOSECONNECTION:
+				this.exitCommand(player, ClientSpeak, ClientHear);
 				break;
 			}
 		}
 		
 	}
+
+	public void indicateTurn(int player, DataInputStream Input, DataOutputStream Output){
+		System.out.println("Entered Turn in server for player: " + player);
+		int read;
+		try {
+			Output.writeInt(Codes.TURN);
+			Output.flush();
+
+			//wait for ok
+			read = Input.readInt();
+
+			if(read == Codes.OK){
+				System.out.println("Indicating turn for player: " + player);
+				Output.write(new String("Its your turn player: " + (player+1)).getBytes());
+				Output.flush();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void SEETABLECommand(DataInputStream Input, DataOutputStream Output){
 		byte[] buffer = new byte[Codes.BUFFER_SIZE];
 		int totalRead = 0;
@@ -193,11 +217,24 @@ public class DominoesServer {
 
 			if(read == Codes.OK){
 				//Send player pieces
-				System.out.println("Player list: " + playerLists.get(player).getList());
+				System.out.println("Player " + player + " list: " + playerLists.get(player).getList());
 				Output.write(playerLists.get(player).getList().getBytes());
+				Output.flush();
 			}
-			Output.flush();
+			
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void exitCommand(int player, DataInputStream Input, DataOutputStream Output)
+	{
+		try{
+			Output.writeInt(Codes.OK);
+			Output.flush();
+			System.out.println("The connection has been closed for player: " + player);
+		}catch(Exception e)
+		{
 			e.printStackTrace();
 		}
 	}

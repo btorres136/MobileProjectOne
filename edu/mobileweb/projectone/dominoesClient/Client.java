@@ -39,6 +39,8 @@ public class Client {
 	private 	String 				serverAddressStr;
     private		int 				serverPort;
 
+    private     String              pieceList;
+
     public String getServerAddresStr(){
         return this.serverAddressStr;
     }
@@ -63,8 +65,7 @@ public class Client {
 
     public void play(){
 
-        String arguments = "";
-        Scanner reader = new Scanner(System.in);
+        
         int readComand;
         try {
             //ServerSocket server = new ServerSocket();
@@ -73,50 +74,62 @@ public class Client {
             socketInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             socketOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             System.out.println("Connected to the game...");
-
-           
-            readComand = socketInputStream.readInt();
-            System.out.println("Read comand client: " + readComand);
-            //Wait for pieces
-
-            if(readComand == Codes.SENDPIECE){
-                this.sendPice();
-            }
             
-
+            //Wait for pieces
             do {
-                arguments = readCommands(reader);
+
+                //arguments = readCommands(reader);
                 //readComands modifies currentComand
-                switch(currentCommand)
+                readComand = socketInputStream.readInt();
+                System.out.println("Read comand client: " + readComand);
+                switch(readComand)
                 {
-                    case Codes.SEETABLE:    seeTable();
+                    case Codes.SENDPIECE:   this.sendPice();
                                             break;
-
-                    case Codes.PUTPIECE:    putPice(arguments);
+                    case Codes.TURN:        this.turn();
                                             break;
-
-                    case Codes.CANTBEPLAY:  cantBePlay();
-                                            break;
-
-                    case Codes.CLOSECONNECTION: exit();
+                    case Codes.CLOSECONNECTION: this.exit();
                                                 break;
                     case Codes.WRONGCOMMAND:
-                                        System.out.println(arguments + " is not a valid command");
+                                        System.out.println("Command is not valid.");
                                         break;
-
                 }
-
-
-            } while (currentCommand != Codes.CLOSECONNECTION);
-
-
+            } while (readComand != Codes.CLOSECONNECTION);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    
+    public void turn(){
+        System.out.println("Entered Turn in client");
+        byte[] buffer = new byte[Codes.BUFFER_SIZE];
+        int read;
 
+        Scanner reader = new Scanner(System.in);
+        String arguments = "";
+        try {
+            socketOutputStream.writeInt(Codes.OK);
+            socketOutputStream.flush();
+
+            read = socketInputStream.read(buffer);
+            System.out.println(new String(buffer));
+
+            arguments = readCommands(reader);
+            
+            switch(currentCommand){
+                case Codes.PUTPIECE: 
+                this.putPice(arguments);
+                break;
+                case Codes.CLOSECONNECTION: exit();
+                break;
+                case Codes.WRONGCOMMAND: System.out.println(arguments + " is not a valid command");                    
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public String readCommands(Scanner reader){
 
         System.out.print(".......................... \n>");
@@ -130,8 +143,6 @@ public class Client {
         while (commandStr.hasMoreTokens()) {
             commandList.add(commandStr.nextToken());
         }
-
-
         try {
             switch(ValidCommands.valueOf(commandList.get(0))){
                 case seeTable: if(commandList.size()>1){
@@ -226,7 +237,8 @@ public class Client {
             
             //recive pices and print
             read = socketInputStream.read(buffer);
-            System.out.println("> Your pieces are: " + new String(buffer));
+            this.pieceList = new String(buffer);
+            System.out.println("> Your pieces are: " + this.pieceList);
             
             
         } catch (Exception e) {
