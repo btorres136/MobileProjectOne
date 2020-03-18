@@ -109,10 +109,8 @@ public class DominoesServer {
 		DataInputStream ClientSpeak;
 		// Send the pieces to each player
 		for(int i = 0; i < 4; i++){
-			ClientSpeak = clientsInputStreams.get(i);
-			ClientHear = clientsOutputStreams.get(i);
-
-			
+			//ClientSpeak = clientsInputStreams.get(i);
+			clientsOutputStreams.get(i).writeUTF(playerLists.get(i).getList());
 		}
 
 		for(int i = 0; i < 28; i++){
@@ -148,7 +146,7 @@ public class DominoesServer {
 			Output.writeInt(Codes.OK);
 			Output.flush();
 			//Output.writeUTF(gameBoard.printList());
-			
+
 			//wait
 			read = Input.readInt();
 
@@ -200,6 +198,4 @@ public class DominoesServer {
 			e.printStackTrace();
 		}
 	}
-
-
 }

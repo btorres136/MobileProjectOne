@@ -74,12 +74,9 @@ public class Client {
             socketOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             System.out.println("Connected to the game...");
 
-           
             readComand = socketInputStream.readInt();
             System.out.println("Read comand client: " + readComand);
             //Wait for pieces
-
-            
 
             do {
                 arguments = readCommands(reader);
@@ -235,8 +232,4 @@ public class Client {
     public void putPice(String arguments){}
 
     public void cantBePlay(){}
-
-
-
-
 }
