@@ -14,6 +14,8 @@ import java.util.StringTokenizer;
 //
 import com.sun.org.apache.bcel.internal.classfile.Code;
 
+import edu.mobileweb.projectone.dominoesServer.Piece;
+import edu.mobileweb.projectone.dominoesServer.PieceList;
 import edu.mobileweb.projectone.transferCodes.Codes;
 //import jdk.internal.util.xml.impl.Input;
 
@@ -25,7 +27,7 @@ import edu.mobileweb.projectone.transferCodes.Codes;
 public class Client {
     //List of valid commmands on the protocol
 	private enum ValidCommands	{
-	    seeTable, putPice, cantBePlay, exit 
+	    seeTable, putPiece, cantBePlay, exit 
 	}
 	
 	//Current command
@@ -39,7 +41,7 @@ public class Client {
 	private 	String 				serverAddressStr;
     private		int 				serverPort;
 
-    private     String              pieceList;
+    private     PieceList           pieceList = new PieceList();
 
     public String getServerAddresStr(){
         return this.serverAddressStr;
@@ -77,9 +79,6 @@ public class Client {
             
             //Wait for pieces
             do {
-
-                //arguments = readCommands(reader);
-                //readComands modifies currentComand
                 readComand = socketInputStream.readInt();
                 System.out.println("Read comand client: " + readComand);
                 switch(readComand)
@@ -132,6 +131,8 @@ public class Client {
     
     public String readCommands(Scanner reader){
 
+        System.out.println("Plays: \n 1.putPiece");
+        System.out.println("Your pieces are: \n");
         System.out.print(".......................... \n>");
 
         LinkedList<String> commandList = new LinkedList<String>();
@@ -152,7 +153,7 @@ public class Client {
                                     currentCommand = Codes.WRONGCOMMAND;
                                 }
                                 break;
-                case putPice: if(commandList.size()>1){
+                case putPiece: if(commandList.size()>1){
                                 currentCommand = Codes.PUTPIECE;
                                 result = commandList.get(1);
                                 } else {
@@ -188,7 +189,7 @@ public class Client {
             socketOutputStream.flush();
 
             int read = socketInputStream.readInt();
-            System.out.println("Thanks for playing " + read);
+            System.out.println("Thanks for playing.");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -230,6 +231,7 @@ public class Client {
         System.out.println("Enter the sendPiece command in the Client");
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
+        String pieceList;
         try {
 
             socketOutputStream.writeInt(Codes.OK);
@@ -237,14 +239,15 @@ public class Client {
             
             //recive pices and print
             read = socketInputStream.read(buffer);
-            this.pieceList = new String(buffer);
-            System.out.println("> Your pieces are: " + this.pieceList);
-            
+            pieceList = new String(buffer);
+            System.out.println("> Your pieces are: " + pieceList);
+            this.pieceList.StrToPiceList(pieceList);
             
         } catch (Exception e) {
             System.out.print("Error from sendPiece in Client: ");
             e.printStackTrace();
         }
+        
     }
     
     public void putPice(String arguments){}
