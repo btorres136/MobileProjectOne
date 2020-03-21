@@ -12,6 +12,7 @@ public class Piece {
 	//Each piece has a left and a right side
 	private int left;
 	private int right;
+	private String piece;
 
 	/**
 	 * <h3> Constructor </h3>
@@ -24,6 +25,8 @@ public class Piece {
 		this.left=left;
 		this.right=right;
 	}
+
+	public Piece(){}
 	
 	/**
 	 * <h3>getLeft Function</h3>
@@ -66,6 +69,11 @@ public class Piece {
 	{
 		System.out.print("(" + left + "|" + right+")");
 	}
+
+	public String getPiece(){
+		this.piece = new String("(" + left + "|" + right+")");
+		return this.piece;
+	}
 	
 	/**
 	 * <h3>Equals Functions</h3>
@@ -78,5 +86,24 @@ public class Piece {
 	public boolean equals(int left, int right)
 	{
 		return ((this.left==left) && (this.right==right)); 
+	}
+
+	public Piece StrToPiece(String strPiece){
+
+		String str = strPiece.replaceAll("[^0-9]", "");
+		int left = 0;
+		int right = 0;
+		for(int i = 0; i<str.length(); i++){
+			int num = Character.getNumericValue(str.charAt(i));
+			if(i%2 == 0){
+				left = num;
+			}else{
+				right = num; 
+			}
+		}
+
+		Piece piece = new Piece(left, right);
+		piece.printPiece();
+		return piece;
 	}
 }

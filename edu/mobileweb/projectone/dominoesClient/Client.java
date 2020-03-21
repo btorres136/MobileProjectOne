@@ -99,6 +99,31 @@ public class Client {
         }
     }
 
+    public void putPiece(String arguments){
+        byte[] buffer = new byte[Codes.BUFFER_SIZE];
+        int read; 
+        Piece selectedPiece = new Piece();
+        try {
+            socketOutputStream.writeInt(Codes.PUTPIECE);
+            socketOutputStream.flush();
+
+            //wait for ok
+            read = socketInputStream.readInt();
+
+            if(read == Codes.OK){
+
+                int  index = Integer.parseInt(arguments);
+                selectedPiece = this.pieceList.getPiece(index - 1);
+                selectedPiece.printPiece();
+                socketOutputStream.write(selectedPiece.getPiece().getBytes());
+                socketOutputStream.flush();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void turn(){
         System.out.println("Entered Turn in client");
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
@@ -117,7 +142,7 @@ public class Client {
             
             switch(currentCommand){
                 case Codes.PUTPIECE: 
-                this.putPice(arguments);
+                this.putPiece(arguments);
                 break;
                 case Codes.CLOSECONNECTION: exit();
                 break;
@@ -132,9 +157,12 @@ public class Client {
     public String readCommands(Scanner reader){
 
         System.out.println("Plays: \n 1.putPiece");
-        System.out.println("Your pieces are: \n");
-        System.out.print(".......................... \n>");
+        
+        
 
+        System.out.println("This are your pieces: \n" + this.pieceList.getList());
+        System.out.println("From left to right select your piece acording to number...");
+        System.out.print(".......................... \n>");
         LinkedList<String> commandList = new LinkedList<String>();
         String command = reader.nextLine();
         String result = "";
@@ -142,8 +170,10 @@ public class Client {
         StringTokenizer commandStr = new StringTokenizer(command);
 
         while (commandStr.hasMoreTokens()) {
+            System.out.println("Found you");
             commandList.add(commandStr.nextToken());
         }
+
         try {
             switch(ValidCommands.valueOf(commandList.get(0))){
                 case seeTable: if(commandList.size()>1){
@@ -232,6 +262,7 @@ public class Client {
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
         String pieceList;
+        PieceList list = new PieceList();
         try {
 
             socketOutputStream.writeInt(Codes.OK);
@@ -241,7 +272,8 @@ public class Client {
             read = socketInputStream.read(buffer);
             pieceList = new String(buffer);
             System.out.println("> Your pieces are: " + pieceList);
-            this.pieceList.StrToPiceList(pieceList);
+            this.pieceList = list.StrToPiceList(pieceList);
+            System.out.println(this.pieceList.getList());
             
         } catch (Exception e) {
             System.out.print("Error from sendPiece in Client: ");
@@ -249,12 +281,4 @@ public class Client {
         }
         
     }
-    
-    public void putPice(String arguments){}
-
-    public void cantBePlay(){}
-
-
-
-
 }

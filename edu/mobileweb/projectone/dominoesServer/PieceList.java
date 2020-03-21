@@ -145,7 +145,7 @@ public class PieceList {
 			piece = new Piece(left[i], right[i]);
 			pieceList.addToHead(piece);
 		}
-		System.out.println(pieceList.getList());
+		//System.out.println(pieceList.getList());
 		return pieceList;
 	}
 }
