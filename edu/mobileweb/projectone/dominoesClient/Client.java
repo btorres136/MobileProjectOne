@@ -12,7 +12,7 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 
 //
-import com.sun.org.apache.bcel.internal.classfile.Code;
+//import com.sun.org.apache.bcel.internal.classfile.Code;
 
 import edu.mobileweb.projectone.dominoesServer.Piece;
 import edu.mobileweb.projectone.dominoesServer.PieceList;
@@ -169,31 +169,21 @@ public class Client {
         StringTokenizer commandStr = new StringTokenizer(command);
 
         while (commandStr.hasMoreTokens()) {
+            //System.out.println(commandStr.nextToken());
             commandList.add(commandStr.nextToken());
         }
 
+
         try {
             switch(ValidCommands.valueOf(commandList.get(0))){
-                case seeTable: if(commandList.size()>1){
-                                currentCommand = Codes.SEETABLE;
+                case seeTable:  currentCommand = Codes.SEETABLE;
                                 result = commandList.get(1);
-                                } else {
-                                    currentCommand = Codes.WRONGCOMMAND;
-                                }
                                 break;
-                case putPiece: if(commandList.size()>1){
-                                currentCommand = Codes.PUTPIECE;
+                case putPiece: currentCommand = Codes.PUTPIECE;
                                 result = commandList.get(1);
-                                } else {
-                                    currentCommand = Codes.WRONGCOMMAND;
-                                }
                                 break;
-                case cantBePlay: if(commandList.size()>1){
-                                currentCommand = Codes.CANTBEPLAY;
-                                result = commandList.get(1);
-                                } else {
-                                    currentCommand = Codes.WRONGCOMMAND;
-                                }
+                case cantBePlay: currentCommand = Codes.CANTBEPLAY;
+                                 result = commandList.get(1);
                                 break;
                 case exit:      currentCommand = Codes.CLOSECONNECTION;
                                 break;
