@@ -11,6 +11,7 @@ import java.util.Random;
 
 import edu.mobileweb.projectone.transferCodes.Codes;
 //import jdk.internal.util.xml.impl.Input;
+import jdk.nashorn.internal.ir.IfNode;
 
 /**
  * <h3>Dominoes Server</h3>
@@ -199,8 +200,55 @@ public class DominoesServer {
 			System.out.println("Player " + player + " wants to play: " + Piece);
 			playedPiece = playedPiece.StrToPiece(Piece);
 
-			//check if the first piece is the 2ble 6, and code advance game mechanics
+			System.out.println("Printing playedPiece.getPiece(): "+ playedPiece.getPiece());
 			
+			if(playedPiece.getLeft() != 6 && playedPiece.getRight() != 6){
+				// Verify the sides if the list.
+				int left = playedPiece.getLeft();
+				int right = playedPiece.getRight();
+				
+				if (left == this.gameBoard.getHead().getLeft() || right == this.gameBoard.getHead().getLeft()) {
+					System.out.println("Head");
+					/*
+					if(left == this.gameBoard.getHead().getLeft()){
+						System.out.println("Rotating and adding piece: " + playedPiece.getPiece() + "to the board");
+						playedPiece.rotate();
+						System.out.println("Rotating piece: " + playedPiece.getPiece());
+						this.gameBoard.addToHead(playedPiece);
+						System.out.println("The piece: " + playedPiece.getPiece() + " has been added to  the board.");
+						System.out.println("Printing the board: ");
+						this.gameBoard.printList();
+					} else if(right == this.gameBoard.getHead().getLeft()){
+						System.out.println("The piece: " + playedPiece.getPiece() +" is being added to the board (no piece rotation)");
+						this.gameBoard.addToHead(playedPiece);
+						System.out.println("Printing the board: ");
+						this.gameBoard.printList();
+					}*/
+
+				} else if(right == this.gameBoard.getTail().getRight() || left == this.gameBoard.getTail().getRight()) {
+					System.out.println("Tail");
+					/*
+					if(left == this.gameBoard.getTail().getRight()){
+						System.out.println("The piece: " + playedPiece.getPiece() +" is being added to the board (no piece rotation)");
+						this.gameBoard.addToTail(playedPiece);
+						System.out.println("Printing the board: ");
+						this.gameBoard.printList();
+					} else if(right == this.gameBoard.getTail().getRight()){System.out.println("Rotating and adding piece: " + playedPiece.getPiece() + "to the board");
+						playedPiece.rotate();
+						System.out.println("Rotating piece: " + playedPiece.getPiece());
+						this.gameBoard.addToTail(playedPiece);
+						System.out.println("The piece: " + playedPiece.getPiece() + " has been added to  the board.");
+						System.out.println("Printing the board: ");
+						this.gameBoard.printList();
+						
+					}*/
+				}
+				
+			}else{
+				System.out.println("The piece (6|6) is being added to the board");
+				this.gameBoard.addToHead(playedPiece);
+				this.gameBoard.printList();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -234,6 +282,8 @@ public class DominoesServer {
 		try{
 			Output.writeInt(Codes.OK);
 			Output.flush();
+			Output.close();
+			Input.close();
 			System.out.println("The connection has been closed for player: " + player);
 		}catch(Exception e)
 		{

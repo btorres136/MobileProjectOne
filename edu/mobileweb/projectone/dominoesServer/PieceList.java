@@ -25,6 +25,10 @@ public class PieceList {
 		this.actualList = new ArrayList();
 		this.count=0;
 	}
+
+	public int size(){
+		return this.count;
+	}
 	
 	/**
 	 * <h3>getHead Function</h3>
@@ -86,7 +90,7 @@ public class PieceList {
 	{
 		return actualList.get(pos);
 	}
-	
+
 	public String getList(){
 		ArrayList<String> Pieces = new ArrayList<String>();
 		for(int i = 0; i < count; i++){
@@ -115,6 +119,12 @@ public class PieceList {
 		System.out.println();
 	}
 
+
+	/***
+	 * Turns a string of pieces to a PieceList
+	 * @param list string
+	 * @return PieceList
+	 */
 	public PieceList StrToPiceList(String list){
 		PieceList pieceList  = new PieceList(); 
 		Piece  piece; 

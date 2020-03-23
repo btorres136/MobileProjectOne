@@ -114,7 +114,6 @@ public class Client {
 
                 int  index = Integer.parseInt(arguments);
                 selectedPiece = this.pieceList.getPiece(index - 1);
-                selectedPiece.printPiece();
                 socketOutputStream.write(selectedPiece.getPiece().getBytes());
                 socketOutputStream.flush();
             }
@@ -170,7 +169,6 @@ public class Client {
         StringTokenizer commandStr = new StringTokenizer(command);
 
         while (commandStr.hasMoreTokens()) {
-            System.out.println("Found you");
             commandList.add(commandStr.nextToken());
         }
 
@@ -219,7 +217,12 @@ public class Client {
             socketOutputStream.flush();
 
             int read = socketInputStream.readInt();
-            System.out.println("Thanks for playing.");
+            if(read == Codes.OK){
+                socketOutputStream.close();
+                socketInputStream.close();
+                System.out.println("Thanks for playing.");
+            }
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -258,7 +261,6 @@ public class Client {
       from the client side it will recive the 7 pices sent by the server and print them on 
       the terminal*/
     public void sendPice(){
-        System.out.println("Enter the sendPiece command in the Client");
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
         String pieceList;

@@ -69,7 +69,10 @@ public class Piece {
 	{
 		System.out.print("(" + left + "|" + right+")");
 	}
-
+	/**
+	 * Get the piece in string
+	 * @return pieceStr
+	 */
 	public String getPiece(){
 		this.piece = new String("(" + left + "|" + right+")");
 		return this.piece;
@@ -88,6 +91,11 @@ public class Piece {
 		return ((this.left==left) && (this.right==right)); 
 	}
 
+	/**
+	 * Turns piece string to Piece obj.
+	 * @param strPiece
+	 * @return Piece
+	 */
 	public Piece StrToPiece(String strPiece){
 
 		String str = strPiece.replaceAll("[^0-9]", "");
@@ -103,7 +111,6 @@ public class Piece {
 		}
 
 		Piece piece = new Piece(left, right);
-		piece.printPiece();
 		return piece;
 	}
 }
