@@ -23,6 +23,8 @@ public class Codes {
 
     public static final int SENDPIECE = 6;
 
+    public static final int TURN = 7;
+
     public static final int WRONGCOMMAND = 30;
     
 }
