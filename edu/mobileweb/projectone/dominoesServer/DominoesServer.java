@@ -112,9 +112,9 @@ public class DominoesServer {
 			ClientHear = clientsOutputStreams.get(i);
 			this.SENDPICECommand(i, ClientSpeak, ClientHear);
 		}
-		System.out.println("Exit asign pieces in server");
+		
 		for(int i = 0; i < 28; i++){
-			System.out.println("Entering game mecanics");
+			
 			int player = firstPlayer+i%4;
 			ClientSpeak = clientsInputStreams.get(player);
 			ClientHear = clientsOutputStreams.get(player);
@@ -189,16 +189,18 @@ public class DominoesServer {
 		byte[] buffer = new byte[Codes.BUFFER_SIZE];
 		int totalRead = 0;
 		int read;
+		Piece playedPiece = new Piece();
 		try {
 			Output.writeInt(Codes.OK);
 			Output.flush();
 
 			read = Input.read(buffer);
 			String Piece = new String(buffer);
-			System.out.println("Player " + player + "wants to play: " + Piece);
+			System.out.println("Player " + player + " wants to play: " + Piece);
+			playedPiece = playedPiece.StrToPiece(Piece);
 
-			Output.writeInt(Codes.OK);
-			Output.flush();
+			//check if the first piece is the 2ble 6, and code advance game mechanics
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

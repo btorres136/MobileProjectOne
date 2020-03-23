@@ -1,6 +1,7 @@
 package edu.mobileweb.projectone.dominoesServer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
@@ -112,5 +113,39 @@ public class PieceList {
 		for (int i=0; i<count; i++)
 			System.out.println(i + " ("+ ((Piece)actualList.get(i)).getLeft() + "|" + ((Piece)actualList.get(i)).getRight() + ")" );
 		System.out.println();
+	}
+
+	public PieceList StrToPiceList(String list){
+		PieceList pieceList  = new PieceList(); 
+		Piece  piece; 
+		
+		String str;
+		str = list.replaceAll("[^0-9]","");
+
+		int[] left = new int[7];
+		int[] right = new int[7];
+		int l = 0, r = 0;
+	
+		for(int i = 0; i<str.length(); i++){
+			
+			int num = Character.getNumericValue(str.charAt(i));
+			//System.out.println(num);
+			//left inpar, right par
+			if((i%2) == 0){
+				left[l] = num;
+				l++;
+			}
+			else{
+				right[r] = num;
+				r++;
+			}
+		}
+		
+		for(int i = 0; i<7; i++){
+			piece = new Piece(left[i], right[i]);
+			pieceList.addToHead(piece);
+		}
+		//System.out.println(pieceList.getList());
+		return pieceList;
 	}
 }
