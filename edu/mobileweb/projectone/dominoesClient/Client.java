@@ -111,7 +111,6 @@ public class Client {
             read = socketInputStream.readInt();
 
             if(read == Codes.OK){
-
                 int  index = Integer.parseInt(arguments);
                 selectedPiece = this.pieceList.getPiece(index - 1);
                 socketOutputStream.write(selectedPiece.getPiece().getBytes());
