@@ -27,8 +27,8 @@ import jdk.nashorn.internal.ir.IfNode;
 public class DominoesServer {
 	//piece list of the player
 	private PieceList playerPieceList;
-	private DataInputStream clientsInputStreams;
-	private DataOutputStream clientsOutputStreams;
+	private DataInputStream Input;
+	private DataOutputStream Output;
 
 	private int id;
 
@@ -50,8 +50,8 @@ public class DominoesServer {
 	 */
 	public DominoesServer(Socket clientSocket, int id) {
 		try {
-			this.clientsInputStreams = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
-			this.clientsOutputStreams = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
+			this.Input = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
+			this.Output = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
 			this.id = id;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -70,23 +70,23 @@ public class DominoesServer {
 		int read;
 		try {
 
-			this.clientsOutputStreams.writeInt(Codes.UPDATE);
-			this.clientsOutputStreams.flush();
+			this.Output.writeInt(Codes.UPDATE);
+			this.Output.flush();
 
-			read = this.clientsInputStreams.readInt();
+			read = this.Input.readInt();
 
 			if(read == Codes.OK){
 				System.out.println("Updating player: " + (this.id+1));
 				if(x != this.id){
-					this.clientsOutputStreams.write(new String("Not youre turn player: " + (this.id+1) + ", it's player: " + (x+1) + " turn.").getBytes());
-					this.clientsOutputStreams.flush();
+					this.Output.write(new String("Not youre turn player: " + (this.id+1) + ", it's player: " + (x+1) + " turn.").getBytes());
+					this.Output.flush();   
 				}else if(x == this.id){
-					this.clientsOutputStreams.write(new String("Youre turn player: " + (this.id+1)).getBytes());
-					this.clientsOutputStreams.flush();
+					this.Output.write(new String("Youre turn player: " + (this.id+1)).getBytes());
+					this.Output.flush();
 				}
 
 				System.out.println("Sending the table to player: " + (this.id+1));
-				this.SEETABLECommand(this.clientsInputStreams, this.clientsOutputStreams, gameBoard);
+				this.SEETABLECommand(gameBoard);
 				/*
 				if(!gameBoard.equals("")){
 					System.out.println("Sending the table to player: " + (this.id+1));
@@ -106,31 +106,31 @@ public class DominoesServer {
 		int readCommand;
 		// Send the pieces to each player
 			
-		this.SENDPICECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+		this.SENDPICECommand(player);
 			
-		this.indicateTurn(player, this.clientsInputStreams, this.clientsOutputStreams);
+		this.indicateTurn(player);
 			
 			
-		readCommand = this.clientsInputStreams.readInt();
+		readCommand = this.Input.readInt();
 
 		System.out.println("Received Command: " + readCommand);
 		switch (readCommand) {
 				// Put command
 			case Codes.PUTPIECE:
-			this.PUTPIECECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+			this.PUTPIECECommand(player);
 			break;
 
 			case Codes.SENDPIECE:
-			this.SENDPICECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+			this.SENDPICECommand(player);
 			break;
 				// Exit command
 			case Codes.CLOSECONNECTION:
-			this.exitCommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+			this.exitCommand(player);
 			break;
 		}
 	}
 
-	public void indicateTurn(int player, DataInputStream Input, DataOutputStream Output){
+	public void indicateTurn(int player){
 		int read;
 		System.out.println("Entered indicate turn on dominoeServer");
 		try {
@@ -156,16 +156,13 @@ public class DominoesServer {
 		}
 	}
 
-	public void SEETABLECommand(DataInputStream Input, DataOutputStream Output, String gameBoard){
-		System.out.println("Enterd seetable in domonesServer");
+	public void SEETABLECommand(String gameBoard){
 		int read;
 		try{
-			Output.write(Codes.SEETABLE);
+			Output.writeInt(Codes.SEETABLE);
 			Output.flush();
-			System.out.println("code.seetable has been sent from dominoesServer");
 
 			read = Input.readInt();
-			System.out.println("Read in seetable on dominoesServer: " + read);
 
 			if(read == Codes.OK){
 				System.out.println("Sending table to the player: ");
@@ -180,7 +177,7 @@ public class DominoesServer {
 		System.out.println("Exit seetable in domonesServer");
 	}
 
-	public void PUTPIECECommand(int player, DataInputStream Input, DataOutputStream Output){
+	public void PUTPIECECommand(int player){
 		int totalRead = 0;
 		int read;
 		Piece playedPiece = new Piece();
@@ -194,9 +191,38 @@ public class DominoesServer {
 			System.out.println("Player " + player + " wants to play: " + playedPiece.getPiece());
 
 			if(!playedPiece.getPiece().equals("(6|6)")){
-				System.out.println("Is not 2ble 6");
+				Piece head = DominoServerApp.gameBoard.getHead();
+				Piece tail = DominoServerApp.gameBoard.getTail();
+
+				if(playedPiece.getRight() == head.getLeft() || playedPiece.getLeft()== head.getLeft()){
+					System.out.println("Adding piece to the left of the table.");
+					if(playedPiece.getRight() == head.getLeft()){
+						DominoServerApp.gameBoard.addToHead(playedPiece);
+						System.out.println("Piece has been added to head of the gameboard.");
+						this.playerPieceList.remove(read - 1);
+					}else{
+						playedPiece.rotate();
+						DominoServerApp.gameBoard.addToHead(playedPiece);
+						System.out.println("Piece has been added to head of the gameboard.");
+						this.playerPieceList.remove(read - 1);
+					}
+				}else if(playedPiece.getRight() == tail.getRight() || playedPiece.getLeft()== tail.getRight()){
+					System.out.println("Adding piece to the right of the table.");
+					if(playedPiece.getLeft() == tail.getRight()){
+						DominoServerApp.gameBoard.addToTail(playedPiece);
+						System.out.println("Piece has been added to the tail of the gameboard.");
+						this.playerPieceList.remove(read - 1);
+					}else{
+						playedPiece.rotate();
+						DominoServerApp.gameBoard.addToTail(playedPiece);
+						System.out.println("Piece has been added to the tail of the gameboard.");
+						this.playerPieceList.remove(read - 1);
+					}
+				}else{
+					// This pice is not playable
+					System.out.println("This pice is not playable");
+				}
 			}else{
-				System.out.println("Is 2ble 6");
 				DominoServerApp.gameBoard.addToTail(playedPiece);
 				this.playerPieceList.remove(read - 1);
 				System.out.println("Piece has been added to the gameboard.");
@@ -208,7 +234,7 @@ public class DominoesServer {
 		}
 	}
 	//This function will send the player pieces.
-	public void SENDPICECommand(int player, DataInputStream Input, DataOutputStream Output){
+	public void SENDPICECommand(int player){
 		byte[] buffer = new byte[Codes.BUFFER_SIZE];
 		int read;
 		try {
@@ -231,7 +257,7 @@ public class DominoesServer {
 		}
 	}
 
-	private void exitCommand(int player, DataInputStream Input, DataOutputStream Output)
+	private void exitCommand(int player)
 	{
 		try{
 			Output.writeInt(Codes.OK);

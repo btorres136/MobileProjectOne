@@ -251,7 +251,7 @@ public class Client {
 
     //get the table
     public void seeTable(){
-        System.out.println("Entered seetable in clients.");
+        
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read; 
         
