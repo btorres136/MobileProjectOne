@@ -73,8 +73,6 @@ public class Client {
     
 
     public void play(){
-
-        
         int readComand;
         try {
             //ServerSocket server = new ServerSocket();
@@ -85,6 +83,7 @@ public class Client {
             System.out.println("Connected to the game...");
             
             do {
+                System.out.println("Entered dfo while in client");
                 readComand = socketInputStream.readInt();
                 System.out.println("Read comand client: " + readComand);
                 switch(readComand)

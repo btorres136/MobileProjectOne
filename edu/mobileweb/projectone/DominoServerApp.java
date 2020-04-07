@@ -85,14 +85,11 @@ public class DominoServerApp {
             for(int x = 0; x<4; x++){
                 if(!DominoServerApp.gameBoard.isEmpty()){
                     players.get(x).update(turn, DominoServerApp.gameBoard.getList() );
-                }else{
-                    players.get(x).update(turn, "");
                 }
             }
             players.get(turn).play(turn);
             i++;
         }while(true);
-
     }
 
     public static void main(String args[]) {

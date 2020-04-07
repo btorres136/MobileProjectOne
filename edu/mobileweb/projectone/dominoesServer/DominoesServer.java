@@ -84,10 +84,14 @@ public class DominoesServer {
 					this.clientsOutputStreams.write(new String("Youre turn player: " + (this.id+1)).getBytes());
 					this.clientsOutputStreams.flush();
 				}
-				
+
+				System.out.println("Sending the table to player: " + (this.id+1));
+				this.SEETABLECommand(this.clientsInputStreams, this.clientsOutputStreams, gameBoard);
+				/*
 				if(!gameBoard.equals("")){
+					System.out.println("Sending the table to player: " + (this.id+1));
 					this.SEETABLECommand(this.clientsInputStreams, this.clientsOutputStreams, gameBoard);
-				}
+				}*/
 			}
 			
 		} catch (Exception e) {
@@ -102,30 +106,28 @@ public class DominoesServer {
 		int readCommand;
 		// Send the pieces to each player
 			
-			this.SENDPICECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+		this.SENDPICECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
 			
-			this.indicateTurn(player, this.clientsInputStreams, this.clientsOutputStreams);
+		this.indicateTurn(player, this.clientsInputStreams, this.clientsOutputStreams);
 			
 			
-			readCommand = this.clientsInputStreams.readInt();
+		readCommand = this.clientsInputStreams.readInt();
 
-			System.out.println("Received Command: " + readCommand);
-			switch (readCommand) {
+		System.out.println("Received Command: " + readCommand);
+		switch (readCommand) {
 				// Put command
-				case Codes.PUTPIECE:
-				this.PUTPIECECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
-				break;
+			case Codes.PUTPIECE:
+			this.PUTPIECECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+			break;
 
-				case Codes.SENDPIECE:
-				this.SENDPICECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
-
+			case Codes.SENDPIECE:
+			this.SENDPICECommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+			break;
 				// Exit command
-				case Codes.CLOSECONNECTION:
-				this.exitCommand(player, this.clientsInputStreams, this.clientsOutputStreams);
-				break;
-			}
-		
-		
+			case Codes.CLOSECONNECTION:
+			this.exitCommand(player, this.clientsInputStreams, this.clientsOutputStreams);
+			break;
+		}
 	}
 
 	public void indicateTurn(int player, DataInputStream Input, DataOutputStream Output){
