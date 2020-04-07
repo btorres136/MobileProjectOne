@@ -7,9 +7,12 @@ import java.io.DataOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
+
+import javax.print.DocFlavor.STRING;
 
 //
 //import com.sun.org.apache.bcel.internal.classfile.Code;
@@ -41,8 +44,12 @@ public class Client {
 	private 	String 				serverAddressStr;
     private		int 				serverPort;
 
-    private     PieceList           pieceList = new PieceList();
+    private     String              pieceListStr;
+    private     String              gameBoard;
 
+    private     int                 id;
+
+    
     public String getServerAddresStr(){
         return this.serverAddressStr;
     }
@@ -77,12 +84,15 @@ public class Client {
             socketOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             System.out.println("Connected to the game...");
             
-            //Wait for pieces
             do {
                 readComand = socketInputStream.readInt();
                 System.out.println("Read comand client: " + readComand);
                 switch(readComand)
                 {
+                    case Codes.UPDATE:      this.update();
+                                            break;
+                    case Codes.SEETABLE:    this.seeTable();
+                                            break;
                     case Codes.SENDPIECE:   this.sendPice();
                                             break;
                     case Codes.TURN:        this.turn();
@@ -99,10 +109,25 @@ public class Client {
         }
     }
 
-    public void putPiece(String arguments){
+    public void update(){
+        byte[] buffer = new byte[Codes.BUFFER_SIZE];
+        int read;
+        try {
+            socketOutputStream.writeInt(Codes.OK);
+            socketOutputStream.flush();
+
+            read = socketInputStream.read(buffer);
+            System.out.println(new String(buffer).trim());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void putPiece(int piece){
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read; 
-        Piece selectedPiece = new Piece();
+        
         try {
             socketOutputStream.writeInt(Codes.PUTPIECE);
             socketOutputStream.flush();
@@ -111,9 +136,7 @@ public class Client {
             read = socketInputStream.readInt();
 
             if(read == Codes.OK){
-                int  index = Integer.parseInt(arguments);
-                selectedPiece = this.pieceList.getPiece(index - 1);
-                socketOutputStream.write(selectedPiece.getPiece().getBytes());
+                socketOutputStream.writeInt(piece); 
                 socketOutputStream.flush();
             }
             
@@ -127,25 +150,36 @@ public class Client {
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
 
-        Scanner reader = new Scanner(System.in);
-        String arguments = "";
+        
+        int arguments;
         try {
             socketOutputStream.writeInt(Codes.OK);
             socketOutputStream.flush();
 
             read = socketInputStream.read(buffer);
-            System.out.println(new String(buffer));
+            System.out.println(new String(buffer).trim());
 
-            arguments = readCommands(reader);
-            
+            System.out.print("<<<<<<<<<<<<<<<<<<<<MENU>>>>>>>>>>>>>>> \n"
+            + "These are your pieces: \n" + this.pieceListStr 
+            + "\n From left to right select the piece you want to play acording to there placement number(1-7) \n"
+            +">");
+            Scanner reader = new Scanner(System.in);
+            arguments = reader.nextInt();
+            this.putPiece(arguments);
+
+            //arguments = readCommands(reader);
+            /*
             switch(currentCommand){
+
                 case Codes.PUTPIECE: 
-                this.putPiece(arguments);
+                this.putPiece();
                 break;
                 case Codes.CLOSECONNECTION: exit();
                 break;
                 case Codes.WRONGCOMMAND: System.out.println(arguments + " is not a valid command");                    
-            }
+            }*/
+            System.out.println("Your turn si over.");
+            
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,9 +190,8 @@ public class Client {
 
         System.out.println("Plays: \n 1.putPiece");
         
-        
 
-        System.out.println("This are your pieces: \n" + this.pieceList.getList());
+        System.out.println("This are your pieces: \n" + this.pieceListStr);
         System.out.println("From left to right select your piece acording to number...");
         System.out.print(".......................... \n>");
         LinkedList<String> commandList = new LinkedList<String>();
@@ -219,28 +252,17 @@ public class Client {
 
     //get the table
     public void seeTable(){
-        byte[] buffer = new byte[Codes.BUFFER_SIZE]; 
+        System.out.println("Entered seetable in clients.");
+        byte[] buffer = new byte[Codes.BUFFER_SIZE];
+        int read; 
+        
         try {
-            int read = 0;
-            //int totalRead =0;
-
-            // Send the comand
-            System.out.println("This is the latest table...");
-            socketOutputStream.writeInt(Codes.SEETABLE);
+            socketOutputStream.writeInt(Codes.OK);
             socketOutputStream.flush();
 
-            //Wating for ok
-
-            read = socketInputStream.readInt(); 
-
-            if (read == Codes.OK){
-                //Recive the pice list string of the table.
-                String tablePicesStr = socketInputStream.readUTF();
-                System.out.println("Table... \n" + tablePicesStr);
-            }
-            else{
-                System.out.println("Something hapended, error:" + read);
-            }
+            read = socketInputStream.read(buffer);
+            this.gameBoard = new String(buffer).trim();
+            System.out.println("The current table is: " + this.gameBoard);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -252,8 +274,6 @@ public class Client {
     public void sendPice(){
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
-        String pieceList;
-        PieceList list = new PieceList();
         try {
 
             socketOutputStream.writeInt(Codes.OK);
@@ -261,11 +281,9 @@ public class Client {
             
             //recive pices and print
             read = socketInputStream.read(buffer);
-            pieceList = new String(buffer);
-            System.out.println("> Your pieces are: " + pieceList);
-            this.pieceList = list.StrToPiceList(pieceList);
-            System.out.println(this.pieceList.getList());
-            
+            this.pieceListStr = new String(buffer).trim();
+            System.out.println("> Your pieces are: " + this.pieceListStr);
+        
         } catch (Exception e) {
             System.out.print("Error from sendPiece in Client: ");
             e.printStackTrace();

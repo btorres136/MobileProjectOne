@@ -25,6 +25,8 @@ public class Codes {
 
     public static final int TURN = 7;
 
+    public static final int UPDATE = 8;
+
     public static final int WRONGCOMMAND = 30;
     
 }

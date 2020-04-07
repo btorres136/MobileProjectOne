@@ -119,6 +119,12 @@ public class PieceList {
 		System.out.println();
 	}
 
+	public boolean isEmpty(){
+		if(count > 0)
+			return false;
+		else
+			return true;
+	}
 
 	/***
 	 * Turns a string of pieces to a PieceList
