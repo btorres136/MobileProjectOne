@@ -83,11 +83,17 @@ public class Client {
             System.out.println("Connected to the game...");
             
             do {
-                System.out.println("Entered dfo while in client");
+                System.out.println("Waiting for command in client");
                 readComand = socketInputStream.readInt();
                 System.out.println("Read comand client: " + readComand);
                 switch(readComand)
                 {
+                    case Codes.LEFT:        this.putPieceLeft();
+                                            break;
+                    case Codes.RIGHT:       this.putPieceRight();
+                                            break;
+                    case Codes.PASS:        this.pass();
+                                            break;
                     case Codes.UPDATE:      this.update();
                                             break;
                     case Codes.SEETABLE:    this.seeTable();
@@ -106,6 +112,56 @@ public class Client {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void putPieceLeft(){
+        byte[] buffer = new byte[Codes.BUFFER_SIZE];
+        int read;
+        int piece;
+        try {
+            socketOutputStream.writeInt(Codes.LEFT);
+            socketOutputStream.flush();
+            
+            read = socketInputStream.readInt();
+
+            if(read == Codes.OK){
+                do {
+                    System.out.print("Select the piece you want to play acording to the location. left to right (1-7) \n $>");
+                    Scanner in = new Scanner(System.in);
+                    piece = in.nextInt();
+
+                    socketOutputStream.writeInt(piece);
+                    socketOutputStream.flush();
+
+                    read = socketInputStream.readInt();
+                    System.out.println("read is: " + read);
+                   
+                    if(read == Codes.OK){
+                        System.out.println("Youre turn is over.");
+                        socketOutputStream.writeInt(Codes.OK);
+                        socketOutputStream.flush();
+                    }else if(read == Codes.NOP){
+                        System.out.println("The piece is not playable plese select again.");
+                        socketOutputStream.writeInt(Codes.NOP);
+                        socketOutputStream.flush();
+                    }
+
+                } while (read == Codes.NOP);
+                
+                
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void putPieceRight(){
+
+    }
+
+    public void pass(){
+
     }
 
     public void update(){
@@ -145,12 +201,12 @@ public class Client {
     }
 
     public void turn(){
-        System.out.println("Entered Turn in client");
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
 
         
         int arguments;
+        int piece;
         try {
             socketOutputStream.writeInt(Codes.OK);
             socketOutputStream.flush();
@@ -158,38 +214,34 @@ public class Client {
             read = socketInputStream.read(buffer);
             System.out.println(new String(buffer).trim());
 
-            System.out.print("<<<<<<<<<<<<<<<<<<<<MENU>>>>>>>>>>>>>>> \n"
+            System.out.print("-------------------------------------Menu------------------------------------- \n"
             + "These are your pieces: \n" + this.pieceListStr 
-            + "\n From left to right select the piece you want to play acording to there placement number(1-7) \n"
-            +">");
+            + "\n Select where do you want to put the piece on the board. \n" 
+            + " 1. Left \n 2.Right \n 3.pass \n $>");
             Scanner reader = new Scanner(System.in);
             arguments = reader.nextInt();
-            this.putPiece(arguments);
-
-            //arguments = readCommands(reader);
-            /*
-            switch(currentCommand){
-
-                case Codes.PUTPIECE: 
-                this.putPiece();
-                break;
-                case Codes.CLOSECONNECTION: exit();
-                break;
-                case Codes.WRONGCOMMAND: System.out.println(arguments + " is not a valid command");                    
-            }*/
-            System.out.println("Your turn si over.");
             
+            //this.putPiece(arguments);
 
+            switch(arguments){
+				case 1: 
+				this.putPieceLeft();
+				break;
+				case 2:
+				this.putPieceRight();
+				break;
+				case 3: 
+				this.pass();
+
+			}
+        
+    
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
+    /*
     public String readCommands(Scanner reader){
-
-        System.out.println("Plays: \n 1.putPiece");
-        
-
         System.out.println("This are your pieces: \n" + this.pieceListStr);
         System.out.println("From left to right select your piece acording to number...");
         System.out.print(".......................... \n>");
@@ -230,7 +282,7 @@ public class Client {
         }       
 
         return result;
-    }
+    }*/
 
     public void exit(){
         try {
@@ -281,8 +333,7 @@ public class Client {
             //recive pices and print
             read = socketInputStream.read(buffer);
             this.pieceListStr = new String(buffer).trim();
-            System.out.println("> Your pieces are: " + this.pieceListStr);
-        
+
         } catch (Exception e) {
             System.out.print("Error from sendPiece in Client: ");
             e.printStackTrace();

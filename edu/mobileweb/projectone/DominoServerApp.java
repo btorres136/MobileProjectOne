@@ -19,18 +19,19 @@ public class DominoServerApp {
 	// Pieces on the table
     public static PieceList gameBoard;
     // pieces assigned to each player
-    private ArrayList<PieceList> playerLists;
+    public static ArrayList<PieceList> playerLists;
     // first player (i.e., she has the (6,6))
     private int firstPlayer;
 
     private DominoServerApp(){
         this.allPieces = new PieceList();
-        this.gameBoard = new PieceList();
-        this.playerLists = new ArrayList<PieceList>(4);
+        DominoServerApp.gameBoard = new PieceList();
+        DominoServerApp.playerLists = new ArrayList<PieceList>(4);
     }
 
     private PieceList getplayerList(int i){
-        return this.playerLists.get(i);
+        return DominoServerApp.playerLists.get(i);
+
     }
 
 
@@ -55,14 +56,14 @@ public class DominoServerApp {
 		for (int i = 0; i < 4; i++)
 		{
 			//Create each list
-			this.playerLists.add(new PieceList());
+			DominoServerApp.playerLists.add(new PieceList());
 			//Assign 7 pieces to each player
 			for(int j = 1; j < 8; j++)
 			{		
 				//Select a piece from the list
 				randomNum = rand.nextInt((totalCount));
 				//Add the selected piece to player i
-				( playerLists.get(i)).addToTail(this.allPieces.getPiece(randomNum));
+				( DominoServerApp.playerLists.get(i)).addToTail(this.allPieces.getPiece(randomNum));
 				//Select the initial player
 				if (this.allPieces.getPiece(randomNum).equals(6, 6))
 					this.firstPlayer=i;
@@ -84,12 +85,45 @@ public class DominoServerApp {
             System.out.println("The current player is: " + (turn + 1));
             for(int x = 0; x<4; x++){
                 if(!DominoServerApp.gameBoard.isEmpty()){
-                    players.get(x).update(turn, DominoServerApp.gameBoard.getList() );
+                    players.get(x).update(turn, DominoServerApp.gameBoard.getList());
                 }
             }
             players.get(turn).play(turn);
             i++;
-        }while(true);
+        }while(win() || stuck());
+    }
+
+    private boolean win(){
+        boolean win = true;
+        for(int x = 0; x<4; x++){
+            if(DominoServerApp.playerLists.get(x).size() < 0){
+                System.out.println("The winer of the game is player: " + (x+1) + " out of pieces.");
+                win = false;
+                break;
+            }
+        }
+        
+        return win;
+    }
+
+    private boolean stuck(){
+        boolean stuck = true;
+        if(DominoServerApp.gameBoard.getHead().getLeft() == DominoServerApp.gameBoard.getTail().getRight()){
+            System.out.println("head left == tail right.");
+            int count = 0;
+            for(int i = 0; i<28; i++){
+                if(DominoServerApp.gameBoard.getPiece(i).getLeft() == DominoServerApp.gameBoard.getHead().getLeft()
+                || DominoServerApp.gameBoard.getPiece(i).getRight() == DominoServerApp.gameBoard.getHead().getLeft()){
+                    count++;
+                    System.out.println("Count of similar pieces is: " + count);
+                    if(count > 6){
+                        stuck = false;
+                        break;
+                    }
+                }
+            }    
+        } 
+        return stuck;
     }
 
     public static void main(String args[]) {
@@ -104,8 +138,9 @@ public class DominoServerApp {
                 Socket newclient = server.accept();
                 players.add(new DominoesServer(newclient, i));
                 System.out.println("New Connection...");
-                players.get(i).setPlayerPieceList(serverApp.getplayerList(i));
-                System.out.println("PLayer: " + (i+1) + " pieces are: " + players.get(i).getPlayerPieceList().getList());
+                //players.get(i).setPlayerPieceList(serverApp.getplayerList(i));
+                System.out.println("DominoesServerApp: " + (i+1) + " pieces are: " + DominoServerApp.playerLists.get(i).getList());
+                //System.out.println("PLayer: " + (i+1) + " pieces are: " + players.get(i).getPlayerPieceList().getList());
             }
 
             System.out.println("Game Starts...");
