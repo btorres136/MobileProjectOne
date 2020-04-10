@@ -114,15 +114,12 @@ public class DominoesServer {
 				case Codes.LEFT:
 				this.putPieceLeft(player);
 				break;
-
 				case Codes.RIGHT:
 				this.putPieceRight(player);
 				break;
-
 				case Codes.PASS:
 				this.pass(player);
 				break;
-				
 				// Exit command
 				case Codes.CLOSECONNECTION:
 				this.exitCommand(player);
@@ -130,6 +127,30 @@ public class DominoesServer {
 			}
 		} while (!turn);	
 		
+	}
+
+	public void endgame(int player, String method){
+		int read;
+		try {
+			Output.writeInt(Codes.ENDGAME);
+			Output.flush();
+
+			read = Input.readInt();
+
+			if(read == Codes.OK){
+				System.out.println("Indication end game to player: " + (this.id+1));
+				if(player != this.id){
+					Output.write(new String("Player: " + (player+1) + " has won the game by: " + method).getBytes());
+					Output.flush();   
+				}else if(player == this.id){
+					Output.write(new String("You have won the game!!! " + method).getBytes());
+					Output.flush();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public void indicateTurn(int player){

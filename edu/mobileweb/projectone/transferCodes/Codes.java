@@ -12,7 +12,7 @@ public class Codes {
     public static final int BUFFER_SIZE = 1024;
     public static final int OK = 1;
     public static final int SEETABLE = 2;
-    public static final int PUTPIECE = 3;
+    public static final int ENDGAME = 3;
     public static final int CANTBEPLAY = 4;
     public static final int CLOSECONNECTION = 5;
     public static final int SENDPIECE = 6;

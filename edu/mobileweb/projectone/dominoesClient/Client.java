@@ -109,6 +109,8 @@ public class Client {
                                             break;
                     case Codes.TURN:        this.turn();
                                             break;
+                    case Codes.ENDGAME:     this.endgame();
+                                            break;
                     case Codes.CLOSECONNECTION: this.exit();
                                                 cont = false;
                                                 break;
@@ -117,6 +119,23 @@ public class Client {
                                         break;
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void endgame(){
+        byte[] buffer = new byte[Codes.BUFFER_SIZE];
+        int read;
+        try {
+            socketOutputStream.writeInt(Codes.OK);
+            socketOutputStream.flush();
+
+            read = socketInputStream.read(buffer);
+            System.out.println(new String(buffer).trim());
+
+            //close the connection.
+            this.exit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -287,49 +306,6 @@ public class Client {
             e.printStackTrace();
         }
     }
-    /*
-    public String readCommands(Scanner reader){
-        System.out.println("This are your pieces: \n" + this.pieceListStr);
-        System.out.println("From left to right select your piece acording to number...");
-        System.out.print(".......................... \n>");
-        LinkedList<String> commandList = new LinkedList<String>();
-        String command = reader.nextLine();
-        String result = "";
-
-        StringTokenizer commandStr = new StringTokenizer(command);
-
-        while (commandStr.hasMoreTokens()) {
-            //System.out.println(commandStr.nextToken());
-            commandList.add(commandStr.nextToken());
-        }
-
-
-        try {
-            switch(ValidCommands.valueOf(commandList.get(0))){
-                case seeTable:  currentCommand = Codes.SEETABLE;
-                                result = commandList.get(1);
-                                break;
-                case putPiece: currentCommand = Codes.PUTPIECE;
-                                result = commandList.get(1);
-                                break;
-                case cantBePlay: currentCommand = Codes.CANTBEPLAY;
-                                 result = commandList.get(1);
-                                break;
-                case exit:      currentCommand = Codes.CLOSECONNECTION;
-                                break;
-                default:        currentCommand = Codes.WRONGCOMMAND;
-                                result = command;
-                                break;
-
-            }
-        } catch (Exception e) {
-            currentCommand = Codes.WRONGCOMMAND;
-            result = command;
-            e.printStackTrace();
-        }       
-
-        return result;
-    }*/
 
     public void exit(){
         try {

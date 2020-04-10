@@ -81,9 +81,10 @@ public class DominoServerApp {
     
     public void play(ArrayList<DominoesServer> players) throws IOException {
         int i = 0;
+        int turn;
         //Update the players of the current table and who's turn it is.
         do{
-            int turn = (this.firstPlayer+i)%4;
+            turn = (this.firstPlayer+i)%4;
             System.out.println("The current player is: " + (turn + 1));
             for(int x = 0; x<4; x++){
                 if(!DominoServerApp.gameBoard.isEmpty()){
@@ -92,24 +93,26 @@ public class DominoServerApp {
             }
             players.get(turn).play(turn);
             i++;
-        }while(win() | stuck());
+        }while(win(players, turn) | stuck(players, turn));
     }
 
-    private boolean win(){
+    private boolean win(ArrayList<DominoesServer> players, int turn){
         System.out.println("CHECKING WIN...");
         boolean win = true;
         for(int x = 0; x<4; x++){
             if(DominoServerApp.playerLists.get(x).size() == 0){
                 System.out.println("The winer of the game is player: " + (x+1) + ", out of pieces.");
                 win = false;
-                break;
+                for(int i = 0; i<players.size(); i++){
+                    players.get(i).endgame(turn, " out of pieces.");
+                }
             }
         }
         
         return win;
     }
 
-    private boolean stuck(){
+    private boolean stuck(ArrayList<DominoesServer> players, int turn){
         System.out.println("CHECKING STUCK...");
         boolean stuck = true;
         ArrayList<Integer> points = new ArrayList<Integer>(4);
@@ -139,6 +142,9 @@ public class DominoServerApp {
                 }
                 int winner = points.indexOf(Collections.min(points));
                 System.out.println("PLAYER " + (winner+1) + " WITH " + points.get(winner) + " POINTS!!!");
+                for(int i = 0; i<players.size(); i++){
+                    players.get(i).endgame(turn, " having less points: " + points.get(winner));
+                }
             }    
         } 
         return stuck;
