@@ -13,6 +13,7 @@ public class Piece {
 	private int left;
 	private int right;
 	private String piece;
+	private int points;
 
 	/**
 	 * <h3> Constructor </h3>
@@ -24,9 +25,14 @@ public class Piece {
 	{
 		this.left=left;
 		this.right=right;
+		this.points = left + right;
 	}
 
 	public Piece(){}
+
+	public int points(){
+		return this.points;
+	}
 	
 	/**
 	 * <h3>getLeft Function</h3>

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 import edu.mobileweb.projectone.dominoesServer.DominoesServer;
 
@@ -90,14 +92,15 @@ public class DominoServerApp {
             }
             players.get(turn).play(turn);
             i++;
-        }while(win() || stuck());
+        }while(win() | stuck());
     }
 
     private boolean win(){
+        System.out.println("CHECKING WIN...");
         boolean win = true;
         for(int x = 0; x<4; x++){
-            if(DominoServerApp.playerLists.get(x).size() < 0){
-                System.out.println("The winer of the game is player: " + (x+1) + " out of pieces.");
+            if(DominoServerApp.playerLists.get(x).size() == 0){
+                System.out.println("The winer of the game is player: " + (x+1) + ", out of pieces.");
                 win = false;
                 break;
             }
@@ -107,11 +110,13 @@ public class DominoServerApp {
     }
 
     private boolean stuck(){
+        System.out.println("CHECKING STUCK...");
         boolean stuck = true;
+        ArrayList<Integer> points = new ArrayList<Integer>(4);
         if(DominoServerApp.gameBoard.getHead().getLeft() == DominoServerApp.gameBoard.getTail().getRight()){
             System.out.println("head left == tail right.");
             int count = 0;
-            for(int i = 0; i<28; i++){
+            for(int i = 0; i<DominoServerApp.gameBoard.size(); i++){
                 if(DominoServerApp.gameBoard.getPiece(i).getLeft() == DominoServerApp.gameBoard.getHead().getLeft()
                 || DominoServerApp.gameBoard.getPiece(i).getRight() == DominoServerApp.gameBoard.getHead().getLeft()){
                     count++;
@@ -121,6 +126,19 @@ public class DominoServerApp {
                         break;
                     }
                 }
+            }
+            if(!stuck){
+                System.out.println("THE GAME IS STUCK... \n THE WINNER IS...");
+                for(int i = 0; i<4; i++){
+                    int sum = 0;
+                    for(int x =0; x<DominoServerApp.playerLists.get(i).size(); x++){
+                        int temp = DominoServerApp.playerLists.get(i).getPiece(x).points();
+                        sum = sum + temp;
+                    }
+                    points.add(sum);
+                }
+                int winner = points.indexOf(Collections.min(points));
+                System.out.println("PLAYER " + (winner+1) + " WITH " + points.get(winner) + " POINTS!!!");
             }    
         } 
         return stuck;
