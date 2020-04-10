@@ -225,14 +225,6 @@ public class DominoesServer {
 					Output.flush();
 					turn = true;
 				}
-
-				read = Input.readInt();
-				System.out.println("read in put pice left loop; " + read);
-			/*do{
-			
-			}while(read != Codes.OK);
-			*/
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -285,10 +277,6 @@ public class DominoesServer {
 					Output.flush();
 					turn = true;
 				}
-
-				read = Input.readInt();
-				System.out.println("read in put pice left loop; " + read);
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -311,6 +299,7 @@ public class DominoesServer {
 						System.out.println("Player has a playable piece.");
 						Output.writeInt(Codes.NOP);
 						Output.flush();
+						break;
 					}else{
 						System.out.println("Player dosent have a playable piece.");
 						Output.writeInt(Codes.OK);
