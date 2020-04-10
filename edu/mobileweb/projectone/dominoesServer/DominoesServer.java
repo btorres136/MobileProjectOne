@@ -12,7 +12,7 @@ import java.util.Random;
 import edu.mobileweb.projectone.DominoServerApp;
 import edu.mobileweb.projectone.transferCodes.Codes;
 //import jdk.internal.util.xml.impl.Input;
-import jdk.nashorn.internal.ir.IfNode;
+//import jdk.nashorn.internal.ir.IfNode;
 
 /**
  * <h3>Dominoes Server</h3>
@@ -29,7 +29,7 @@ public class DominoesServer {
 	private PieceList playerPieceList;
 	private DataInputStream Input;
 	private DataOutputStream Output;
-
+	private boolean turn = false;
 	private int id;
 
 	public void setPlayerPieceList(PieceList list){
@@ -68,10 +68,10 @@ public class DominoesServer {
 	public void update(int x, String gameBoard){
 		int read;
 		try {
-			System.out.println("Sending update code");
+			//System.out.println("Sending update code");
 			Output.writeInt(Codes.UPDATE);
 			Output.flush();
-			System.out.println("Sent update code");
+			//System.out.println("Sent update code");
 			read = Input.readInt();
 
 			if(read == Codes.OK){
@@ -86,11 +86,6 @@ public class DominoesServer {
 
 				System.out.println("Sending the table to player: " + (this.id+1));
 				this.SEETABLECommand(gameBoard);
-				/*
-				if(!gameBoard.equals("")){
-					System.out.println("Sending the table to player: " + (this.id+1));
-					this.SEETABLECommand(this.clientsInputStreams, this.clientsOutputStreams, gameBoard);
-				}*/
 			}
 			
 		} catch (Exception e) {
@@ -109,35 +104,37 @@ public class DominoesServer {
 			
 		this.indicateTurn(player);
 			
-			
-		readCommand = this.Input.readInt();
+		do {
+			readCommand = this.Input.readInt();
 
-		System.out.println("Received Command: " + readCommand);
-		switch (readCommand) {
-			case Codes.LEFT:
-			this.putPieceLeft(player);
-			break;
+			System.out.println("Received Command: " + readCommand);
+			switch (readCommand) {
+				case Codes.LEFT:
+				this.putPieceLeft(player);
+				break;
 
-			case Codes.RIGHT:
-			this.putPieceRight(player);
-			break;
+				case Codes.RIGHT:
+				this.putPieceRight(player);
+				break;
 
-			case Codes.PASS:
-			this.pass(player);
-			break;
-			/*
-			case Codes.PUTPIECE:
-			this.PUTPIECECommand(player);
-			break;
-			*/
-			case Codes.SENDPIECE:
-			this.SENDPICECommand(player);
-			break;
-				// Exit command
-			case Codes.CLOSECONNECTION:
-			this.exitCommand(player);
-			break;
-		}
+				case Codes.PASS:
+				this.pass(player);
+				break;
+				/*
+				case Codes.PUTPIECE:
+				this.PUTPIECECommand(player);
+				break;
+				*/
+				case Codes.SENDPIECE:
+				this.SENDPICECommand(player);
+				break;
+					// Exit command
+				case Codes.CLOSECONNECTION:
+				this.exitCommand(player);
+				break;
+			}
+		} while (!turn);	
+		
 	}
 
 	public void indicateTurn(int player){
@@ -151,15 +148,10 @@ public class DominoesServer {
 			read = Input.readInt();
 	
 			if(read == Codes.OK){
-				if(this.id != player){
-					System.out.println("Its not player: " + (this.id+1) + " turn");
-					Output.write(new String("Its not youre turn player: " + (this.id+1)).getBytes());
-					Output.flush();
-				}else if( this.id == player){
-					System.out.println("Its player: " + (this.id+1)+ " turn");
-					Output.write(new String("Its  youre turn player: " + (this.id+1)).getBytes());
-					Output.flush();
-				}
+				System.out.println("Its player: " + (this.id+1)+ " turn");
+				Output.write(new String("Its  youre turn player: " + (this.id+1)).getBytes());
+				Output.flush();
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -186,87 +178,12 @@ public class DominoesServer {
 		}
 		//System.out.println("Exit seetable in domonesServer");
 	}
-
-	public void PUTPIECECommand(int player){
-		int read;
-		//Piece playedPiece = new Piece();
-		try {
-
-			Output.writeInt(Codes.OK);
-			Output.flush();
-			System.out.println("sent ok");
-			read = Input.readInt();
-			System.out.println("read in putpiece: " + read);
-
-			switch(read){
-				case 1: 
-				this.putPieceLeft(player);
-				break;
-				case 2:
-				this.putPieceRight(player);
-				break;
-				case 3: 
-				this.pass(player);
-
-			}
-			
-			/*
-			playedPiece = DominoServerApp.playerLists.get(player).getPiece(read -1);
-			System.out.println("Player " + player + " wants to play: " + playedPiece.getPiece());
-
-			if(!playedPiece.getPiece().equals("(6|6)")){
-				Piece head = DominoServerApp.gameBoard.getHead();
-				Piece tail = DominoServerApp.gameBoard.getTail();
-
-				if(playedPiece.getRight() == head.getLeft() || playedPiece.getLeft()== head.getLeft()){
-					System.out.println("Adding piece to the left of the table.");
-					if(playedPiece.getRight() == head.getLeft()){
-						DominoServerApp.gameBoard.addToHead(playedPiece);
-						System.out.println("Piece has been added to head of the gameboard.");
-						DominoServerApp.playerLists.get(player).remove(read-1);
-					}else{
-						playedPiece.rotate();
-						DominoServerApp.gameBoard.addToHead(playedPiece);
-						System.out.println("Piece has been added to head of the gameboard.");
-						DominoServerApp.playerLists.get(player).remove(read-1);
-					}
-				}else if(playedPiece.getRight() == tail.getRight() || playedPiece.getLeft()== tail.getRight()){
-					System.out.println("Adding piece to the right of the table.");
-					if(playedPiece.getLeft() == tail.getRight()){
-						DominoServerApp.gameBoard.addToTail(playedPiece);
-						System.out.println("Piece has been added to the tail of the gameboard.");
-						DominoServerApp.playerLists.get(player).remove(read-1);
-					}else{
-						playedPiece.rotate();
-						DominoServerApp.gameBoard.addToTail(playedPiece);
-						System.out.println("Piece has been added to the tail of the gameboard.");
-						DominoServerApp.playerLists.get(player).remove(read-1);
-					}
-				}else{
-					// This pice is not playable
-					System.out.println("This pice is not playable");
-				}
-			}else{
-				DominoServerApp.gameBoard.addToTail(playedPiece);
-				DominoServerApp.playerLists.get(player).remove(read-1);
-				System.out.println("Piece has been added to the gameboard.");
-				
-			}*/
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void putPieceLeft(int player){
 		int read;
 		Piece playedPiece = new Piece();
 		try {
-			
-			do{
 				Output.writeInt(Codes.OK);
 				Output.flush();
-				
 				read = Input.readInt();
 				
 				playedPiece = DominoServerApp.playerLists.get(player).getPiece(read - 1);
@@ -281,12 +198,18 @@ public class DominoesServer {
 							DominoServerApp.playerLists.get(player).remove(read-1);
 							Output.writeInt(Codes.OK);
 							Output.flush();
+							turn = true;
 						}else if(playedPiece.getLeft() == head.getLeft()) {
 							playedPiece.rotate();
 							DominoServerApp.gameBoard.addToHead(playedPiece);
 							System.out.println("Piece has been added to head of the gameboard.");
 							DominoServerApp.playerLists.get(player).remove(read-1);
 							Output.writeInt(Codes.OK);
+							Output.flush();
+							turn = true;
+						}else{
+							System.out.println("This piece is not playable...");
+							Output.writeInt(Codes.NOP);
 							Output.flush();
 						}
 					}else{
@@ -300,12 +223,15 @@ public class DominoesServer {
 					System.out.println("Piece has been added to the gameboard.");
 					Output.writeInt(Codes.OK);
 					Output.flush();
+					turn = true;
 				}
 
 				read = Input.readInt();
 				System.out.println("read in put pice left loop; " + read);
-			}while(read != Codes.OK);
+			/*do{
 			
+			}while(read != Codes.OK);
+			*/
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -316,41 +242,87 @@ public class DominoesServer {
 		int read;
 		Piece playedPiece = new Piece();
 		try {
-
-			Output.writeInt(Codes.OK);
-			Output.flush();
-			
-			read = Input.readInt();
-			
-			playedPiece = DominoServerApp.playerLists.get(player).getPiece(read - 1);
-			System.out.println("The player wants to play piece: " + playedPiece.getPiece());
-
-			if(!playedPiece.equals(6, 6)){
-				Piece tail = DominoServerApp.gameBoard.getTail();
-				if(playedPiece.getRight() == tail.getRight()){
+				Output.writeInt(Codes.OK);
+				Output.flush();
+				read = Input.readInt();
+				
+				playedPiece = DominoServerApp.playerLists.get(player).getPiece(read - 1);
+				System.out.println("The player wants to play piece: " + playedPiece.getPiece());
+				if(!playedPiece.equals(6, 6)){
+					if(!DominoServerApp.gameBoard.isEmpty()){
+						Piece tail = DominoServerApp.gameBoard.getTail();
+	
+						if(playedPiece.getLeft() == tail.getRight()){
+							DominoServerApp.gameBoard.addToTail(playedPiece);
+							System.out.println("Piece has been added to head of the gameboard.");
+							DominoServerApp.playerLists.get(player).remove(read-1);
+							Output.writeInt(Codes.OK);
+							Output.flush();
+							turn = true;
+						}else if(playedPiece.getRight() == tail.getRight()) {
+							playedPiece.rotate();
+							DominoServerApp.gameBoard.addToTail(playedPiece);
+							System.out.println("Piece has been added to head of the gameboard.");
+							DominoServerApp.playerLists.get(player).remove(read-1);
+							Output.writeInt(Codes.OK);
+							Output.flush();
+							turn = true;
+						}else{
+							System.out.println("This piece is not playable...");
+							Output.writeInt(Codes.NOP);
+							Output.flush();
+						}
+					}else{
+						System.out.println("This piece is not playable...");
+						Output.writeInt(Codes.NOP);
+						Output.flush();
+					}
+				}else{
 					DominoServerApp.gameBoard.addToTail(playedPiece);
-					System.out.println("Piece has been added to head of the gameboard.");
 					DominoServerApp.playerLists.get(player).remove(read-1);
-				}else if (playedPiece.getLeft() == tail.getRight()) {
-					playedPiece.rotate();
-					DominoServerApp.gameBoard.addToTail(playedPiece);
-					System.out.println("Piece has been added to head of the gameboard.");
-					DominoServerApp.playerLists.get(player).remove(read-1);
+					System.out.println("Piece has been added to the gameboard.");
+					Output.writeInt(Codes.OK);
+					Output.flush();
+					turn = true;
 				}
-			}else{
-				DominoServerApp.gameBoard.addToTail(playedPiece);
-				DominoServerApp.playerLists.get(player).remove(read-1);
-				System.out.println("Piece has been added to the gameboard.");
-			}
+
+				read = Input.readInt();
+				System.out.println("read in put pice left loop; " + read);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 	public void pass(int player){
 		int read;
-		Piece playedPiece = new Piece();
 		try {
+			Output.writeInt(Codes.OK);
+			Output.flush();
+
+			if(!DominoServerApp.gameBoard.isEmpty()){
+				Piece head = DominoServerApp.gameBoard.getHead();
+				Piece tail = DominoServerApp.gameBoard.getTail();
+				for(int i = 0; i < DominoServerApp.playerLists.get(player).size(); i++){
+					Piece piece = DominoServerApp.playerLists.get(player).getPiece(i);
+					
+					if((piece.getRight() == head.getLeft() || piece.getLeft() == head.getLeft()) || 
+					(piece.getRight() == tail.getRight() ||  piece.getLeft() == tail.getRight())){
+						System.out.println("Player has a playable piece.");
+						Output.writeInt(Codes.NOP);
+						Output.flush();
+					}else{
+						System.out.println("Player dosent have a playable piece.");
+						Output.writeInt(Codes.OK);
+						Output.flush();
+						turn = true;
+					}
+				}
+			}else{
+				System.out.println("Player has a playable piece.");
+				Output.writeInt(Codes.NOP);
+				Output.flush();
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -14,6 +14,8 @@ import java.util.StringTokenizer;
 
 import javax.print.DocFlavor.STRING;
 
+import edu.mobileweb.projectone.DominoServerApp;
+
 //
 //import com.sun.org.apache.bcel.internal.classfile.Code;
 
@@ -21,6 +23,7 @@ import edu.mobileweb.projectone.dominoesServer.Piece;
 import edu.mobileweb.projectone.dominoesServer.PieceList;
 import edu.mobileweb.projectone.transferCodes.Codes;
 //import jdk.internal.util.xml.impl.Input;
+import javafx.scene.control.TableView.ResizeFeatures;
 
 /**
  * <h3>Client Class</h3>
@@ -114,9 +117,8 @@ public class Client {
         }
     }
 
-    public void putPieceLeft(){
-        byte[] buffer = new byte[Codes.BUFFER_SIZE];
-        int read;
+    public int putPieceLeft(){
+        int read = 0;
         int piece;
         try {
             socketOutputStream.writeInt(Codes.LEFT);
@@ -125,43 +127,103 @@ public class Client {
             read = socketInputStream.readInt();
 
             if(read == Codes.OK){
-                do {
-                    System.out.print("Select the piece you want to play acording to the location. left to right (1-7) \n $>");
-                    Scanner in = new Scanner(System.in);
-                    piece = in.nextInt();
+                //System.out.println("The game board: \n" + this.gameBoard);
+                //System.out.println("These are your pieces: \n" + this.pieceListStr );
+                System.out.print("Select the piece you want to play acording to the location. left to right (1-7) \n $>");
+                Scanner in = new Scanner(System.in);
+                piece = in.nextInt();
 
-                    socketOutputStream.writeInt(piece);
-                    socketOutputStream.flush();
+                socketOutputStream.writeInt(piece);
+                socketOutputStream.flush();
 
-                    read = socketInputStream.readInt();
-                    System.out.println("read is: " + read);
+                read = socketInputStream.readInt();
+                System.out.println("read is: " + read);
                    
-                    if(read == Codes.OK){
-                        System.out.println("Youre turn is over.");
-                        socketOutputStream.writeInt(Codes.OK);
-                        socketOutputStream.flush();
-                    }else if(read == Codes.NOP){
-                        System.out.println("The piece is not playable plese select again.");
-                        socketOutputStream.writeInt(Codes.NOP);
-                        socketOutputStream.flush();
-                    }
+                if(read == Codes.OK){
+                    System.out.println("Youre turn is over.");
+                    socketOutputStream.writeInt(Codes.OK);
+                    socketOutputStream.flush();
+                }else if(read == Codes.NOP){
+                    System.out.println("The piece is not playable plese select again.");
+                    socketOutputStream.writeInt(Codes.NOP);
+                    socketOutputStream.flush();
+                }
 
-                } while (read == Codes.NOP);
-                
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return read;
+    }
+
+    public int putPieceRight(){
+        int read =0;
+        int piece;
+        try {
+            socketOutputStream.writeInt(Codes.RIGHT);
+            socketOutputStream.flush();
+            
+            read = socketInputStream.readInt();
+
+            if(read == Codes.OK){
+                //System.out.println("The game board: \n" + this.gameBoard);
+                //System.out.println("These are your pieces: \n" + this.pieceListStr );
+                System.out.print("Select the piece you want to play acording to the location. left to right (1-7) \n $>");
+                Scanner in = new Scanner(System.in);
+                piece = in.nextInt();
+
+                socketOutputStream.writeInt(piece);
+                socketOutputStream.flush();
+
+                read = socketInputStream.readInt();
+                System.out.println("read is: " + read);
+                   
+                if(read == Codes.OK){
+                    System.out.println("Youre turn is over.");
+                    socketOutputStream.writeInt(Codes.OK);
+                    socketOutputStream.flush();
+                }else if(read == Codes.NOP){
+                    System.out.println("The piece is not playable plese select again.");
+                    socketOutputStream.writeInt(Codes.NOP);
+                    socketOutputStream.flush();
+                }
                 
             }
             
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return read;
     }
 
-    public void putPieceRight(){
+    public int pass(){
+        int read=0;
+        try {
+            socketOutputStream.writeInt(Codes.PASS);
+            socketOutputStream.flush();
+            
+            read = socketInputStream.readInt();
 
-    }
-
-    public void pass(){
-
+            if(read == Codes.OK){
+                read = socketInputStream.readInt();
+                System.out.println("read is: " + read);            
+                if(read == Codes.OK){
+                    System.out.println("Youre pased youre turn is over.");
+                    socketOutputStream.writeInt(Codes.OK);
+                    socketOutputStream.flush();
+    
+                }else if(read == Codes.NOP){
+                    System.out.println("You have a playable piece pick again.");
+                    socketOutputStream.writeInt(Codes.NOP);
+                    socketOutputStream.flush();
+                }
+            }
+           
+        } catch (Exception e) {
+            e.printStackTrace();
+        } 
+        return read;
     }
 
     public void update(){
@@ -179,63 +241,50 @@ public class Client {
         }
     }
 
-    public void putPiece(int piece){
-        byte[] buffer = new byte[Codes.BUFFER_SIZE];
-        int read; 
-        
-        try {
-            socketOutputStream.writeInt(Codes.PUTPIECE);
-            socketOutputStream.flush();
-
-            //wait for ok
-            read = socketInputStream.readInt();
-
-            if(read == Codes.OK){
-                socketOutputStream.writeInt(piece); 
-                socketOutputStream.flush();
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void turn(){
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
 
         
         int arguments;
-        int piece;
+        int res = 0;
         try {
             socketOutputStream.writeInt(Codes.OK);
             socketOutputStream.flush();
-
+            
             read = socketInputStream.read(buffer);
             System.out.println(new String(buffer).trim());
-
-            System.out.print("-------------------------------------Menu------------------------------------- \n"
-            + "These are your pieces: \n" + this.pieceListStr 
-            + "\n Select where do you want to put the piece on the board. \n" 
-            + " 1. Left \n 2.Right \n 3.pass \n $>");
-            Scanner reader = new Scanner(System.in);
-            arguments = reader.nextInt();
-            
-            //this.putPiece(arguments);
-
-            switch(arguments){
-				case 1: 
-				this.putPieceLeft();
-				break;
-				case 2:
-				this.putPieceRight();
-				break;
-				case 3: 
-				this.pass();
-
-			}
-        
-    
+            do {
+                
+                System.out.print("-------------------------------------Menu------------------------------------- \n"
+                + "The game board: \n" + this.gameBoard
+                + "\nThese are your pieces: \n" + this.pieceListStr 
+                + "\nSelect where do you want to put the piece on the board (Acording to number). \n" 
+                + " 1.Left \n 2.Right \n 3.pass \n $>");
+                Scanner reader = new Scanner(System.in);
+                arguments = reader.nextInt();
+                
+                
+                //this.putPiece(arguments);
+                
+                switch(arguments){
+                    case 1: 
+                    res = this.putPieceLeft();
+                    break;
+                    case 2:
+                    res = this.putPieceRight();
+                    break;
+                    case 3: 
+                    res = this.pass();
+                    break;
+                    default:
+                    res = 0; 
+                    System.out.println("SELECT A VALID OPTION");
+                    break;
+                }
+                System.out.println("res: " + res);
+               
+            } while (res != Codes.OK);
         } catch (Exception e) {
             e.printStackTrace();
         }
