@@ -78,7 +78,7 @@ public class Client {
 
     public void play(){
         int readComand;
-        boolean cont = false;
+        boolean cont = true;
         try {
             //ServerSocket server = new ServerSocket();
             InetAddress serveAddress = InetAddress.getByName(serverAddressStr);
@@ -87,11 +87,12 @@ public class Client {
             socketOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             System.out.println("Connected to the game...");
             
-            do {
+            while (cont) {
+                turn = false;
                 System.out.println("Waiting for command in client");
                 readComand = socketInputStream.readInt();
                 System.out.println("Read comand client: " + readComand);
-                turn = false;
+                
                 switch(readComand)
                 {
                     case Codes.LEFT:        this.putPieceLeft();
@@ -109,13 +110,13 @@ public class Client {
                     case Codes.TURN:        this.turn();
                                             break;
                     case Codes.CLOSECONNECTION: this.exit();
-                                                cont = true;
+                                                cont = false;
                                                 break;
                     case Codes.WRONGCOMMAND:
                                         System.out.println("Command is not valid.");
                                         break;
                 }
-            } while (!cont);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,6 +153,7 @@ public class Client {
                     System.out.println("The piece is not playable plese select again.");
                     //socketOutputStream.writeInt(Codes.NOP);
                     //socketOutputStream.flush();
+                    turn = false;
                 }
 
             }
@@ -192,6 +194,7 @@ public class Client {
                     System.out.println("The piece is not playable plese select again.");
                     //socketOutputStream.writeInt(Codes.NOP);
                     //socketOutputStream.flush();
+                    turn = false;
                 }
                 
             }
@@ -212,15 +215,16 @@ public class Client {
             if(read == Codes.OK){
                 read = socketInputStream.readInt();
                 System.out.println("read is: " + read);            
-                if(read == Codes.OK){
+                if(read == Codes.NOP){
+                    System.out.println("You have a playable piece pick again.");
+                    //socketOutputStream.writeInt(Codes.NOP);
+                    //socketOutputStream.flush();
+                    turn = false;
+                }else if(read == Codes.OK){
                     System.out.println("Youre pased youre turn is over.");
                     //socketOutputStream.writeInt(Codes.OK);
                     //socketOutputStream.flush();
                     turn = true;
-                }else if(read == Codes.NOP){
-                    System.out.println("You have a playable piece pick again.");
-                    //socketOutputStream.writeInt(Codes.NOP);
-                    //socketOutputStream.flush();
                 }
             }
            
@@ -255,7 +259,7 @@ public class Client {
             read = socketInputStream.read(buffer);
             System.out.println(new String(buffer).trim());
             do {
-                
+                System.out.println("TURN: " + turn);
                 System.out.print("-------------------------------------Menu------------------------------------- \n"
                 + "The game board: \n" + this.gameBoard
                 + "\nThese are your pieces: \n" + this.pieceListStr 

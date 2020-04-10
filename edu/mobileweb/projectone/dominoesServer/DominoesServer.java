@@ -105,6 +105,8 @@ public class DominoesServer {
 		this.indicateTurn(player);
 			
 		do {
+			System.out.println("Turn for player: " + (player+1) + " is: " + turn);
+			turn = false;
 			readCommand = this.Input.readInt();
 
 			System.out.println("Received Command: " + readCommand);
@@ -120,15 +122,8 @@ public class DominoesServer {
 				case Codes.PASS:
 				this.pass(player);
 				break;
-				/*
-				case Codes.PUTPIECE:
-				this.PUTPIECECommand(player);
-				break;
-				*/
-				case Codes.SENDPIECE:
-				this.SENDPICECommand(player);
-				break;
-					// Exit command
+				
+				// Exit command
 				case Codes.CLOSECONNECTION:
 				this.exitCommand(player);
 				break;
@@ -167,10 +162,9 @@ public class DominoesServer {
 			read = Input.readInt();
 
 			if(read == Codes.OK){
-				System.out.println("Sending table to the player: ");
 				Output.write(gameBoard.getBytes());
 				Output.flush();
-				System.out.println("Table has been sent to the player: ");
+				System.out.println("Table has been sent to the player");
 			}
 
 		}catch(IOException e){
@@ -178,6 +172,7 @@ public class DominoesServer {
 		}
 		//System.out.println("Exit seetable in domonesServer");
 	}
+	
 	public void putPieceLeft(int player){
 		int read;
 		Piece playedPiece = new Piece();
@@ -299,13 +294,19 @@ public class DominoesServer {
 						System.out.println("Player has a playable piece.");
 						Output.writeInt(Codes.NOP);
 						Output.flush();
+						turn = false;
 						break;
 					}else{
 						System.out.println("Player dosent have a playable piece.");
-						Output.writeInt(Codes.OK);
-						Output.flush();
+						//Output.writeInt(Codes.OK);
+						//Output.flush();
 						turn = true;
 					}
+				}
+
+				if(turn){
+					Output.writeInt(Codes.OK);
+					Output.flush();
 				}
 			}else{
 				System.out.println("Player has a playable piece.");
