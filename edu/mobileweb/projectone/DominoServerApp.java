@@ -85,7 +85,7 @@ public class DominoServerApp {
         //Update the players of the current table and who's turn it is.
         do{
             turn = (this.firstPlayer+i)%4;
-            System.out.println("The current player is: " + (turn + 1));
+            System.out.println("THE CURRENT PLAYER IS: " + (turn + 1));
             for(int x = 0; x<4; x++){
                 if(!DominoServerApp.gameBoard.isEmpty()){
                     players.get(x).update(turn, DominoServerApp.gameBoard.getList());
@@ -93,7 +93,9 @@ public class DominoServerApp {
             }
             players.get(turn).play(turn);
             i++;
-        }while(win(players, turn) | stuck(players, turn));
+        }while(win(players, turn));
+
+        
     }
 
     private boolean win(ArrayList<DominoesServer> players, int turn){
@@ -104,10 +106,12 @@ public class DominoServerApp {
                 System.out.println("The winer of the game is player: " + (x+1) + ", out of pieces.");
                 win = false;
                 for(int i = 0; i<players.size(); i++){
-                    players.get(i).endgame(turn, " out of pieces.");
+                    players.get(i).endgame(turn, " OUT OF PIECES.");
                 }
             }
         }
+
+        win = stuck(players, turn);
         
         return win;
     }
@@ -117,13 +121,11 @@ public class DominoServerApp {
         boolean stuck = true;
         ArrayList<Integer> points = new ArrayList<Integer>(4);
         if(DominoServerApp.gameBoard.getHead().getLeft() == DominoServerApp.gameBoard.getTail().getRight()){
-            System.out.println("head left == tail right.");
             int count = 0;
             for(int i = 0; i<DominoServerApp.gameBoard.size(); i++){
                 if(DominoServerApp.gameBoard.getPiece(i).getLeft() == DominoServerApp.gameBoard.getHead().getLeft()
                 || DominoServerApp.gameBoard.getPiece(i).getRight() == DominoServerApp.gameBoard.getHead().getLeft()){
                     count++;
-                    System.out.println("Count of similar pieces is: " + count);
                     if(count > 6){
                         stuck = false;
                         break;
@@ -131,7 +133,7 @@ public class DominoServerApp {
                 }
             }
             if(!stuck){
-                System.out.println("THE GAME IS STUCK... \n THE WINNER IS...");
+                System.out.println("THE GAME IS STUCK... \nTHE WINNER IS...");
                 for(int i = 0; i<4; i++){
                     int sum = 0;
                     for(int x =0; x<DominoServerApp.playerLists.get(i).size(); x++){
@@ -143,7 +145,7 @@ public class DominoServerApp {
                 int winner = points.indexOf(Collections.min(points));
                 System.out.println("PLAYER " + (winner+1) + " WITH " + points.get(winner) + " POINTS!!!");
                 for(int i = 0; i<players.size(); i++){
-                    players.get(i).endgame(turn, " having less points: " + points.get(winner));
+                    players.get(i).endgame(turn, " HAVING LESS POINTS: " + points.get(winner));
                 }
             }    
         } 
@@ -162,9 +164,7 @@ public class DominoServerApp {
                 Socket newclient = server.accept();
                 players.add(new DominoesServer(newclient, i));
                 System.out.println("New Connection...");
-                //players.get(i).setPlayerPieceList(serverApp.getplayerList(i));
                 System.out.println("DominoesServerApp: " + (i+1) + " pieces are: " + DominoServerApp.playerLists.get(i).getList());
-                //System.out.println("PLayer: " + (i+1) + " pieces are: " + players.get(i).getPlayerPieceList().getList());
             }
 
             System.out.println("Game Starts...");

@@ -29,6 +29,7 @@ public class DominoesServer {
 	private PieceList playerPieceList;
 	private DataInputStream Input;
 	private DataOutputStream Output;
+	private Socket socket;
 	private boolean turn = false;
 	private int id;
 
@@ -48,8 +49,9 @@ public class DominoesServer {
 	 */
 	public DominoesServer(Socket clientSocket, int id) {
 		try {
-			this.Input = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
-			this.Output = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
+			this.socket = clientSocket;
+			this.Input = new DataInputStream(new BufferedInputStream(this.socket.getInputStream()));
+			this.Output = new DataOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));
 			this.id = id;
 			//this.playerPieceList = DominoServerApp.playerLists.get(id);
 		} catch (IOException e) {
@@ -123,10 +125,12 @@ public class DominoesServer {
 				// Exit command
 				case Codes.CLOSECONNECTION:
 				this.exitCommand(player);
+				Input.close();
+				Output.close();
+				socket.close();
 				break;
 			}
 		} while (!turn);	
-		
 	}
 
 	public void endgame(int player, String method){
@@ -140,13 +144,14 @@ public class DominoesServer {
 			if(read == Codes.OK){
 				System.out.println("Indication end game to player: " + (this.id+1));
 				if(player != this.id){
-					Output.write(new String("Player: " + (player+1) + " has won the game by: " + method).getBytes());
+					Output.write(new String("PLAYER: " + (player+1) + " HAS WON THE GAME BY: " + method).getBytes());
 					Output.flush();   
 				}else if(player == this.id){
-					Output.write(new String("You have won the game!!! " + method).getBytes());
+					Output.write(new String("YOU HAVE WON THE GAME!!! " + method).getBytes());
 					Output.flush();
 				}
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -368,9 +373,8 @@ public class DominoesServer {
 		try{
 			Output.writeInt(Codes.OK);
 			Output.flush();
-			Output.close();
-			Input.close();
 			System.out.println("The connection has been closed for player: " + player);
+			turn = true;
 		}catch(Exception e)
 		{
 			e.printStackTrace();

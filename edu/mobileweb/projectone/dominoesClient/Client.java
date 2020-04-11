@@ -41,7 +41,9 @@ public class Client {
     
     // Data stream and output streams for data transfer
 	private 	DataInputStream 	socketInputStream;
-	private 	DataOutputStream 	socketOutputStream;
+    private 	DataOutputStream 	socketOutputStream;
+    private     Socket              socket;
+    private     InetAddress         serveAddress;
 	
 	// Connection parameters
 	private 	String 				serverAddressStr;
@@ -52,7 +54,7 @@ public class Client {
 
     private     int                 id;
     private     boolean             turn = false;
-
+    private     boolean             cont = true;
     
     public String getServerAddresStr(){
         return this.serverAddressStr;
@@ -73,16 +75,20 @@ public class Client {
     public Client(String serveAddressStr, int serverPort) {
         this.serverAddressStr = serveAddressStr;
         this.serverPort=serverPort;
+        try {
+            this.serveAddress = InetAddress.getByName(serverAddressStr);
+            this.socket = new Socket(serveAddress,serverPort);    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
     }
     
 
     public void play(){
         int readComand;
-        boolean cont = true;
         try {
             //ServerSocket server = new ServerSocket();
-            InetAddress serveAddress = InetAddress.getByName(serverAddressStr);
-            Socket socket = new Socket(serveAddress,serverPort);
             socketInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             socketOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
             System.out.println("Connected to the game...");
@@ -133,9 +139,6 @@ public class Client {
 
             read = socketInputStream.read(buffer);
             System.out.println(new String(buffer).trim());
-
-            //close the connection.
-            this.exit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -313,12 +316,14 @@ public class Client {
             socketOutputStream.flush();
 
             int read = socketInputStream.readInt();
+            
             if(read == Codes.OK){
-                socketOutputStream.close();
                 socketInputStream.close();
+                socketOutputStream.close();
+                socket.close();
                 System.out.println("Thanks for playing.");
             }
-            
+            cont = false;
         } catch (Exception e) {
             e.printStackTrace();
         }
