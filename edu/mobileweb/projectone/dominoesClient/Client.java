@@ -116,15 +116,19 @@ public class Client {
                     case Codes.TURN:        this.turn();
                                             break;
                     case Codes.ENDGAME:     this.endgame();
+                                            cont = false;
                                             break;
                     case Codes.CLOSECONNECTION: this.exit();
-                                                cont = false;
                                                 break;
                     case Codes.WRONGCOMMAND:
                                         System.out.println("Command is not valid.");
                                         break;
                 }
             }
+            this.exit();
+            socketInputStream.close();
+            socketOutputStream.close();
+            socket.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -318,12 +322,8 @@ public class Client {
             int read = socketInputStream.readInt();
             
             if(read == Codes.OK){
-                socketInputStream.close();
-                socketOutputStream.close();
-                socket.close();
                 System.out.println("Thanks for playing.");
             }
-            cont = false;
         } catch (Exception e) {
             e.printStackTrace();
         }

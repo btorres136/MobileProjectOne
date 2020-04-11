@@ -127,7 +127,7 @@ public class DominoesServer {
 				this.exitCommand(player);
 				Input.close();
 				Output.close();
-				socket.close();
+			    socket.close();
 				break;
 			}
 		} while (!turn);	
