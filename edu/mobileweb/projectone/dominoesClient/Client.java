@@ -31,28 +31,24 @@ import javafx.scene.control.TableView.ResizeFeatures;
  * @author Joel E. Martinez
  */
 public class Client {
-    //List of valid commmands on the protocol
-	private enum ValidCommands	{
-	    seeTable, putPiece, cantBePlay, exit 
-	}
 	
-	//Current command
-    private		 int 				currentCommand;
-    
-    // Data stream and output streams for data transfer
+    // Data input stream and output streams for data transfer
 	private 	DataInputStream 	socketInputStream;
     private 	DataOutputStream 	socketOutputStream;
+
+    //socket connections
     private     Socket              socket;
     private     InetAddress         serveAddress;
 	
 	// Connection parameters
 	private 	String 				serverAddressStr;
     private		int 				serverPort;
-
+    
+    //Strings to manage the information sent from the server.
     private     String              pieceListStr;
     private     String              gameBoard;
 
-    private     int                 id;
+    //Boolean to manege the while lops of play and turn.
     private     boolean             turn = false;
     private     boolean             cont = true;
     
@@ -71,7 +67,12 @@ public class Client {
 
         client.play();
     }
-
+    /**
+     * <h3>Client</h3>
+     * <p>Default constructor. Sets the socket connections with the server addres and port.</p>
+     * @param serveAddressStr
+     * @param serverPort
+     */
     public Client(String serveAddressStr, int serverPort) {
         this.serverAddressStr = serveAddressStr;
         this.serverPort=serverPort;
@@ -84,7 +85,10 @@ public class Client {
         
     }
     
-
+    /**
+     * <h3>Play</h3>
+     * <p>Initializes the data input and output streams and waits for the commands of the server.</p>
+     */
     public void play(){
         int readComand;
         try {
@@ -133,7 +137,10 @@ public class Client {
             e.printStackTrace();
         }
     }
-
+    /**
+     * <h3>EndGame</h3>
+     * <p>Recives the person who won or if you won at the end of the game, including the manner in which the game was won.</p>
+     */
     public void endgame(){
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
@@ -148,6 +155,12 @@ public class Client {
         }
     }
 
+    /**
+     * <h3>PutPieceLeft</h3>
+     * <p>Promts the choice of which piece the user wants to play on the left side of the board.
+     * Sends it to the server and waits for respons to indicate if the piece is playable or not.
+     * Turn will be set to true if the play is valid, if the play is not valid turn will be false.</p>
+     */
     public void putPieceLeft(){
         int read = 0;
         int piece;
@@ -189,6 +202,12 @@ public class Client {
         }
     }
 
+    /**
+     * <h3>PutPieceRight</h3>
+     * <p>Promts the choice of which piece the user wants to play on the right side of the board.
+     * Sends it to the server and waits for respons to indicate if the piece is playable or not.
+     * Turn will be set to true if the play is valid, if the play is not valid turn will be false.</p>
+     */
     public void putPieceRight(){
         int read =0;
         int piece;
@@ -230,6 +249,12 @@ public class Client {
         }
     }
 
+    /**
+     * <h3>Pass</h3>
+     * <p>Sends the pass command to the server and waits to see if the player has a playable piece or dosent.
+     * Will set turn to false if the player hase a playable piece, 
+     * turn will be set to true if the player dosent have a playable piece.</p>
+     */
     public void pass(){
         int read=0;
         try {
@@ -259,6 +284,10 @@ public class Client {
         } 
     }
 
+    /**
+     * <h3>Update</h3>
+     * <p>Recives whose turn it is</p>
+     */
     public void update(){
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
@@ -274,6 +303,17 @@ public class Client {
         }
     }
 
+    /**
+     * <h3>Turn</h3>
+     * <p>This function promts the menu and hapens when its the turn of the player.
+     * Gives 3 options: </p>
+     * <ol>
+     *      <li>Left ,initiates the command to put the piece on the left side of the board.</li>
+     *      <li>Right ,initiates the command to put the piece on the right side of the board.</li>
+     *      <li>Pass ,initiates the command pass</li>
+     * </ol>
+     * <p>This function is control with a do while loop with a bollean(turn) variable thats affected by each of the previous choices.</p>
+     */
     public void turn(){
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;
@@ -314,6 +354,10 @@ public class Client {
         }
     }
 
+    /**
+     * <h3>Exit</h3>
+     * <p>Sends the exit command to the server.</p>
+     */
     public void exit(){
         try {
             socketOutputStream.writeInt(Codes.CLOSECONNECTION);
@@ -329,7 +373,10 @@ public class Client {
         }
     }
 
-    //get the table
+    /**
+     * <h3>SeeTabel</h3>
+     * <p>Recives the table from the server and prints it on the screen.</p>
+     */
     public void seeTable(){
         
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
@@ -347,9 +394,10 @@ public class Client {
             e.printStackTrace();
         }
     }
-    /*This comand will work from server to client one time at the begining of the game 
-      from the client side it will recive the 7 pices sent by the server and print them on 
-      the terminal*/
+    /**
+     * <h3>SendPiece</h3>
+     * <p>Recives the player pieces from the server as a string and stores them.</p>
+     */
     public void sendPice(){
         byte[] buffer = new byte[Codes.BUFFER_SIZE];
         int read;

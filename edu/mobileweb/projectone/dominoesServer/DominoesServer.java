@@ -27,9 +27,12 @@ import edu.mobileweb.projectone.transferCodes.Codes;
 public class DominoesServer {
 	//piece list of the player
 	private PieceList playerPieceList;
+	// Input and Output for data transfer.
 	private DataInputStream Input;
 	private DataOutputStream Output;
+	// Socke tfor connection to client
 	private Socket socket;
+
 	private boolean turn = false;
 	private int id;
 
@@ -43,9 +46,11 @@ public class DominoesServer {
 
 	
 	/**
-	 * <h3>Constructor</h3>
-	 * <p>
-	 * </p>
+	 * <h3>DominoesServer</h3>
+	 * <p>Recives the socket and id of the client. 
+	 * Initializes socket connections, client id, Input and Output data streams for data transfer. </p>
+	 * @param clientSocket
+	 * @param id
 	 */
 	public DominoesServer(Socket clientSocket, int id) {
 		try {
@@ -61,12 +66,13 @@ public class DominoesServer {
 
 	}
 
-	/***
-	 * iterates over the players
-	 * 
-	 * @throws IOException
+	/**
+	 * <h3>update</h3>
+	 * <p>Recives the player wo is playing and the string gameboard
+	 * Indecates who's player turn is to the client and sends the table.</p>
+	 * @param x
+	 * @param gameBoard
 	 */
-
 	public void update(int x, String gameBoard){
 		int read;
 		try {
@@ -96,6 +102,14 @@ public class DominoesServer {
 
 	}
 
+	/***
+	 * <h3>play</h3>
+	 * <p>Recives the player turn.
+	 * Sends the player its pieces and indicates the turn for the player. 
+	 * Waits for comands of the client, will keep waiting until a valid play is made.</p>
+	 * @param player
+	 * @throws IOException
+	 */
 	public void play(int player) throws IOException
 	{
 		//System.out.println("Entered play for player; " + (player+1));
@@ -133,6 +147,13 @@ public class DominoesServer {
 		} while (!turn);	
 	}
 
+	/**
+	 * <h3>endgame</h3>
+	 * <p>Recives the player and the method in which the player won.
+	 * indicates this to the client.</p>
+	 * @param player
+	 * @param method
+	 */
 	public void endgame(int player, String method){
 		int read;
 		try {
@@ -158,6 +179,11 @@ public class DominoesServer {
 
 	}
 
+	/**
+	 * <h3>indicateTurn</h3>
+	 * <p>Indicates the turn to play to the player that it recived.</p>
+	 * @param player
+	 */
 	public void indicateTurn(int player){
 		int read;
 		System.out.println("Entered indicate turn on dominoeServer");
@@ -178,7 +204,11 @@ public class DominoesServer {
 			e.printStackTrace();
 		}
 	}
-
+	/**
+	 * <h3>SEETABLECommand</h3>
+	 * <p>Recives the gameboard as a srtring and sends it to the client.</p>
+	 * @param gameBoard
+	 */
 	public void SEETABLECommand(String gameBoard){
 		int read;
 		try{
@@ -199,6 +229,15 @@ public class DominoesServer {
 		//System.out.println("Exit seetable in domonesServer");
 	}
 	
+	/**
+	 * <h3>putPieceLeft</h3>
+	 * <p>Recives player, its used to idndicate which player played.
+	 * Recives the piece that the client whants to play verify if its playable on the Left side of the board.,
+	 * if it is playable the piece is added to the table and removed from the player piece and will send the cleint a comfirmed.
+	 * If the piece is not plyabel the client will be sent and invalid command.
+	 * If the played is valid turn = true if its not turn = false</p>
+	 * @param player
+	 */
 	public void putPieceLeft(int player){
 		int read;
 		Piece playedPiece = new Piece();
@@ -251,6 +290,14 @@ public class DominoesServer {
 		}
 	}
 
+	/**
+	 * <h3>putPieceLeft</h3>
+	 * <p>Recives player, its used to idndicate which player played.
+	 * Recives the piece that the client whants to play verify if its playable on the Right side of the board.,
+	 * if it is playable the piece is added to the table and removed from the player piece and will send the cleint a comfirmed.
+	 * If the piece is not plyabel the client will be sent and invalid command. If the played is valid turn = true if its not turn = false</p>
+	 * @param player
+	 */
 	public void putPieceRight(int player){
 		int read;
 		Piece playedPiece = new Piece();
@@ -303,6 +350,15 @@ public class DominoesServer {
 		}
 	}
 
+	/**
+	 * <h3>pass</h3>
+	 * <p>Recives player, its used to idndicate which player passed.
+	 * Verifies that the player that wnts to pass has a playabel piece or not.
+	 * If the player has a playable piece the client will recive a invalid command. 
+	 * if the player dosent have a playable piece the client will recive a valid command.
+	 * if the pass is valid turn = true if its not turn = false</p>
+	 * @param player
+	 */
 	public void pass(int player){
 		int read;
 		try {
@@ -344,7 +400,12 @@ public class DominoesServer {
 			e.printStackTrace();
 		}
 	}
-	//This function will send the player pieces.
+	/**
+	 * <h3>SENDPICECommand</h3>
+	 * <p>Recives player, its used to idndicate which player will recive its pieces.
+	 * Sends the pieces of the player</p>
+	 * @param player
+	 */
 	public void SENDPICECommand(int player){
 		byte[] buffer = new byte[Codes.BUFFER_SIZE];
 		int read;
@@ -367,7 +428,11 @@ public class DominoesServer {
 			e.printStackTrace();
 		}
 	}
-
+	/**
+	 * <h3>exitCommand</h3>
+	 * <p>Sends the comfirmation that the player will disconnect to the cleint.<p>
+	 * @param player
+	 */
 	private void exitCommand(int player)
 	{
 		try{

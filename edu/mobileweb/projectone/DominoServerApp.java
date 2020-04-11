@@ -24,19 +24,21 @@ public class DominoServerApp {
     public static ArrayList<PieceList> playerLists;
     // first player (i.e., she has the (6,6))
     private int firstPlayer;
-
+    /**
+     * <h3>DominoServeApp</h3>
+     * <p>Constructor that initializes two PieceList Objects and a List for the pieces of the player.</p>
+     */
     private DominoServerApp(){
         this.allPieces = new PieceList();
         DominoServerApp.gameBoard = new PieceList();
         DominoServerApp.playerLists = new ArrayList<PieceList>(4);
     }
 
-    private PieceList getplayerList(int i){
-        return DominoServerApp.playerLists.get(i);
 
-    }
-
-
+    /**
+     * <h3>assignPieces</h3>
+     * <p>Generates 28 dominoe pieces and assigns them to each player randomly.</p>
+     */
     public void assignPieces()
 	{
 		//Random generator
@@ -78,7 +80,14 @@ public class DominoServerApp {
 		}
 	}
     
-    
+    /**
+     * <h3>Play</h3>
+     * <p>Recives a list of DominoeServer objects(players). 
+     * Indicate the turn of the player to play and updates all other players of who is playing.
+     * Until a winer is found.</p>
+     * @param players
+     * @throws IOException
+     */
     public void play(ArrayList<DominoesServer> players) throws IOException {
         int i = 0;
         int turn;
@@ -98,6 +107,16 @@ public class DominoServerApp {
         
     }
 
+    /**
+     * <h3>win</h3>
+     * <p>Recives DominoesServer List of 4 players and the one that is playing(int).
+     * Verifies the Piece list of all players to see which one is empty, 
+     * if it is empty then it will broad cast a message indicating who won the game by having no pieces. 
+     * If all players have 1 or more pieces it will check if the game is stuck. The function will return false if there is a winner.</p>
+     * @param players
+     * @param turn
+     * @return
+     */
     private boolean win(ArrayList<DominoesServer> players, int turn){
         System.out.println("CHECKING WIN...");
         boolean win = true;
@@ -116,6 +135,18 @@ public class DominoServerApp {
         return win;
     }
 
+    /**
+     * <h3>stuck</h3>
+     * <p>Recives DominoesServer List of 4 players and the one that is playing(int).
+     * Verifies that the left side of the left piece equals the right side of the right piece,
+     * if this is true it will check if there are 7 pieces with the same number as the sides of the table and set the boollean stuck to false,
+     * if stuck is set to false, the function will add all the pieces of eeach individual player and store them in a List,
+     * which is checked by searching the minimum points of the all the players indicating the winner.
+     * Will brodcast the winner to all players with the method have less points and the point total.</p>
+     * @param players
+     * @param turn
+     * @return
+     */
     private boolean stuck(ArrayList<DominoesServer> players, int turn){
         System.out.println("CHECKING STUCK...");
         boolean stuck = true;

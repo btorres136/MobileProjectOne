@@ -29,7 +29,11 @@ public class Piece {
 	}
 
 	public Piece(){}
-
+	/**
+	 * <h3>points</h3>
+	 * <p>Gets the point of a piece</p>
+	 * @return sum of left side and the right side of the piece.
+	 */
 	public int points(){
 		return this.points;
 	}
